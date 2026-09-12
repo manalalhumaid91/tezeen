@@ -400,7 +400,6 @@
             background: #047857;
         }
 
-        /* نافذة إعدادات المتجر والشعار */
         .settings-modal {
             display: none;
             position: fixed;
@@ -431,7 +430,6 @@
             margin-bottom: 20px;
         }
 
-        /* تنسيق الفوتر (تزين) */
         .main-footer-tazeen {
             text-align: center;
             padding: 20px 0;
@@ -579,7 +577,6 @@
         </div>
     </div>
 
-    <!-- نافذة إعدادات المتجر ورفع الشعار من الجهاز -->
     <div class="settings-modal" id="settingsModal">
         <div class="settings-content">
             <h3>إعدادات اسم المتجر والشعار</h3>
@@ -596,7 +593,6 @@
         </div>
     </div>
 
-    <!-- فوتر منصة تزين -->
     <footer class="main-footer-tazeen">
         جميع الحقوق محفوظة &copy; 2026 | منصة <span>تزين</span> للخدمات والتقييمات الذكية
     </footer>
@@ -795,15 +791,17 @@
             document.getElementById('card-store').innerText = store;
             document.getElementById('card-company-name').innerText = currentClient.name;
 
-            const processBadgeCreation = (photoUrl) => {
-                if (photoUrl) {
-                    document.getElementById('card-avatar').src = photoUrl;
+            const processBadgeCreation = (photoBase64) => {
+                if (photoBase64) {
+                    document.getElementById('card-avatar').src = photoBase64;
                 } else {
                     document.getElementById('card-avatar').src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
                 }
 
                 const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-                const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
+                
+                // تمرير صورة الموظف (Base64) وصيغة الشركة واسم الموظف والفرع في الرابط بدقة
+                const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}&photo=${encodeURIComponent(photoBase64 || '')}`;
 
                 const qrContainer = document.getElementById('card-qrcode');
                 qrContainer.innerHTML = "";
