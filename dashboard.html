@@ -31,7 +31,7 @@
             margin: 0 auto;
         }
 
-        /* شبكة الإحصائيات الثلاثة حسب التصميم المعتمد */
+        /* شبكة الإحصائيات الثلاثة حسب التصميم المعتمد تماماً */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -68,7 +68,7 @@
             margin: 0;
         }
 
-        /* شريط البحث والفلترة (الفروع + النجوم + البحث) */
+        /* شريط الفلترة والبحث المعتمد */
         .filter-section {
             background: var(--bg-card);
             padding: 15px 20px;
@@ -185,7 +185,7 @@
 <body>
 
     <div class="container">
-        <!-- الإحصائيات حسب التصميم المعتمد تماماً -->
+        <!-- الإحصائيات الثلاثة حسب الصورة المعتمدة -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي التقييمات</h3>
@@ -201,7 +201,7 @@
             </div>
         </div>
 
-        <!-- شريط الفلترة والبحث مع اختيار الفرع -->
+        <!-- شريط الفلترة (جميع الفروع بجانب محرك البحث + التقييمات) -->
         <div class="filter-section">
             <select id="store-filter" onchange="filterData()">
                 <option value="">جميع الفروع</option>
@@ -209,6 +209,8 @@
                 <option value="فرع جدة">فرع جدة</option>
                 <option value="فرع الدمام">فرع الدمام</option>
             </select>
+
+            <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterData()">
 
             <select id="rating-filter" onchange="filterData()">
                 <option value="">جميع التقييمات</option>
@@ -218,8 +220,6 @@
                 <option value="2">🙁 سيء (2)</option>
                 <option value="1">😡 سيء جداً (1)</option>
             </select>
-
-            <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterData()">
         </div>
 
         <!-- جدول التقييمات -->
@@ -236,7 +236,7 @@
                             <th>اسم العميل</th>
                             <th>رقم الجوال</th>
                             <th>التعليق</th>
-                            <th>الموظف / الفرع</th>
+                            <th>الموظف</th>
                             <th>الوقت</th>
                         </tr>
                     </thead>
@@ -268,7 +268,7 @@
 
                 allEvaluations = data || [];
                 
-                // تصفير الفلاتر عند التحديث اليدوي
+                // إعادة تعيين حقول الفلترة عند التحديث
                 document.getElementById('store-filter').value = "";
                 document.getElementById('rating-filter').value = "";
                 document.getElementById('search-input').value = "";
@@ -340,10 +340,13 @@
             const filtered = allEvaluations.filter(item => {
                 const itemRating = Number(item.rating);
                 
-                // الفلترة بدقة تامة لكل عنصر على حدة
+                // مطابقة الفرع
                 const matchesStore = selectedStore === "" || (item.store_id && item.store_id.toLowerCase().includes(selectedStore));
+                
+                // مطابقة التقييم (النجوم)
                 const matchesRating = selectedRating === "" || itemRating === Number(selectedRating);
                 
+                // مطابقة حقول البحث النصي
                 const name = (item.customer_name || '').toLowerCase();
                 const mobile = (item.customer_mobile || '').toLowerCase();
                 const comment = (item.comment || '').toLowerCase();
