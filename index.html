@@ -44,20 +44,24 @@
             text-align: center;
         }
 
-        /* ترتيب العناصر: الصورة أولاً في المنتصف */
+        /* حاوية مركزية تجمع الصورة واسم المركز لضمان توسطهما معاً تماماً */
+        .header-profile-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
         .employee-avatar {
             width: 100px;
             height: 100px;
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid var(--primary-light);
-            margin: 0 auto 15px auto;
+            margin: 0 auto 12px auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             background: #e2e8f0;
             display: block;
         }
 
-        /* تحتها اسم المركز */
         .store-brand {
             font-size: 14px;
             color: var(--primary-color);
@@ -66,7 +70,6 @@
             border-radius: 20px;
             display: inline-block;
             font-weight: 700;
-            margin-bottom: 12px;
         }
 
         h2 {
@@ -163,7 +166,7 @@
             background: #1e40af;
         }
 
-        /* تنسيق شاشة الشكر الأصلية المعتمدة تماماً كما طلبتِ */
+        /* شاشة الشكر الأصلية المعتمدة تماماً كما هي بدون أي تغيير */
         .thank-you {
             display: none;
             text-align: center;
@@ -253,18 +256,15 @@
 <body>
 
     <div class="card" id="rating-card">
-        <!-- الصورة في المنتصف -->
-        <img id="emp-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-avatar">
-        
-        <!-- تحتها اسم المركز -->
-        <div>
-            <span class="store-brand" id="store-brand-name">اسم المركز</span>
+        <!-- حاوية الصورة وتحتها اسم المركز متمركزة تماماً في المنتصف -->
+        <div class="header-profile-section">
+            <img id="emp-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-avatar">
+            <div>
+                <span class="store-brand" id="store-brand-name">اسم المركز</span>
+            </div>
         </div>
         
-        <!-- تزين الخدمة مع اسم الموظف -->
         <h2 id="emp-name-title">تزين الخدمة</h2>
-        
-        <!-- الفرع -->
         <p class="emp-subtitle" id="emp-store-title">الفرع</p>
 
         <form id="evaluation-form" onsubmit="submitEvaluation(event)">
@@ -295,7 +295,7 @@
         </form>
     </div>
 
-    <!-- شاشة الشكر الأصلية المعتمدة بعلامة الصح، الإيموجي والعبارة -->
+    <!-- شاشة الشكر الأصلية المعتمدة -->
     <div class="card thank-you" id="thank-you-card">
         <div class="success-icon-container">
             <svg viewBox="0 0 24 24">
@@ -384,7 +384,6 @@
 
                 if (error) throw error;
 
-                // تحديث الإيموجي المختار في شاشة الشكر بناءً على اختيار العميل
                 const parts = selectedRatingText.split(' ');
                 document.getElementById('chosen-emoji-icon').innerText = parts[0] || '😁';
                 document.getElementById('chosen-emoji-label').innerText = parts.slice(1).join(' ') || selectedRatingText;
