@@ -195,9 +195,8 @@
 <body>
 
     <div class="card" id="rating-card">
-        <div class="store-brand" id="store-brand-name">مركز التجميل</div>
+        <div class="store-brand" id="store-brand-name">اسم الشركة</div>
         
-        <!-- صورة الموظف الحقيقية المرفوعة من الجهاز -->
         <img id="emp-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-avatar">
         
         <h2 id="emp-name-title">تزين الخدمة</h2>
@@ -250,15 +249,16 @@
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
         const companyName = urlParams.get('company') || 'اسم الشركة';
-        const empPhoto = urlParams.get('photo') || '';
 
-        // تعبئة البيانات بدقة في صفحة التقييم
+        // ضبط النصوص والعنوان المتفق عليه
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        if (empPhoto && empPhoto !== 'null' && empPhoto !== '') {
-            document.getElementById('emp-avatar-img').src = decodeURIComponent(empPhoto);
+        // جلب صورة الموظف المخزنة محلياً بناءً على اسم الموظف والفرع
+        const savedPhoto = localStorage.getItem(`emp_photo_${empName}_${storeName}`);
+        if (savedPhoto) {
+            document.getElementById('emp-avatar-img').src = savedPhoto;
         }
 
         let selectedRatingValue = 5;
