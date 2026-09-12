@@ -517,7 +517,7 @@
             </div>
 
             <button class="action-btn" onclick="generateEmployeeBadge()">إنشاء البطاقة وعرضها للطباعة</button>
-            <div class="loading-overlay" id="loadingBadge">جاري رفع الصورة للسحابة وإنشاء البطاقة...</div>
+            <div class="loading-overlay" id="loadingBadge">جاري معالجة البيانات وتوليد البطاقة...</div>
 
             <!-- معاينة البطاقة -->
             <div class="badge-preview-area" id="badgePreviewArea">
@@ -643,6 +643,16 @@
             }
         }
 
+        // تحويل الصورة محلياً (Base64) لتفادي مشاكل الـ Storage بالكامل وضمان عمل البطاقة فوراً
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         async function uploadFileToSupabase(file, folderName) {
             try {
                 const fileExt = file.name.split('.').pop();
@@ -671,9 +681,9 @@
                 
                 return publicUrlData.publicUrl;
             } catch (err) {
-                console.error("خطأ في رفع الملف:", err);
-                alert("تعذر رفع الصورة للسحابة، تأكد من إعدادات التخزين في Supabase (Storage Bucket named tazeen-storage).");
-                return null;
+                console.warn("تنبيه: تعذر الرفع للسحابة، سيتم استخدام التشفير المحلي للصورة:", err);
+                // استخدام Base64 المحلي بدلاً من إيقاف البرنامج
+                return await convertFileToBase64(file);
             }
         }
 
