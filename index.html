@@ -266,11 +266,11 @@
 
         <form id="evaluation-form" onsubmit="submitEvaluation(event)">
             <div class="rating-container">
-                <button type="button" class="rating-btn" onclick="setRating(5, '😁 ممتاز')" title="ممتاز">😁</button>
-                <button type="button" class="rating-btn" onclick="setRating(4, '🙂 جيد')" title="جيد">🙂</button>
-                <button type="button" class="rating-btn" onclick="setRating(3, '😐 متوسط')" title="متوسط">😐</button>
-                <button type="button" class="rating-btn" onclick="setRating(2, '🙁 سيء')" title="سيء">🙁</button>
-                <button type="button" class="rating-btn" onclick="setRating(1, '😡 سيء جداً')" title="سيء جداً">😡</button>
+                <button type="button" class="rating-btn" onclick="setRating(5, '😁 ممتاز', this)" title="ممتاز">😁</button>
+                <button type="button" class="rating-btn" onclick="setRating(4, '🙂 جيد', this)" title="جيد">🙂</button>
+                <button type="button" class="rating-btn" onclick="setRating(3, '😐 متوسط', this)" title="متوسط">😐</button>
+                <button type="button" class="rating-btn" onclick="setRating(2, '🙁 سيء', this)" title="سيء">🙁</button>
+                <button type="button" class="rating-btn" onclick="setRating(1, '😡 سيء جداً', this)" title="سيء جداً">😡</button>
             </div>
 
             <div class="form-group">
@@ -324,44 +324,24 @@
         const clientEmail = urlParams.get('client') || '';
         const companyName = urlParams.get('company') || 'اسم المركز';
         const urlPhoto = urlParams.get('photo');
-        const urlLogo = urlParams.get('logo');
 
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // دالة آمنة ومستقرة لجلب صورة الموظف وشعار المركز من الـ URL أو التخزين المحلي
-        function loadMediaAssets() {
-            // 1. معالجة صورة الموظف
-            if (urlPhoto) {
-                try {
-                    document.getElementById('emp-avatar-img').src = decodeURIComponent(urlPhoto);
-                } catch(e) {}
-            } else {
-                const cleanEmp = empName.trim();
-                const cleanStore = storeName.trim();
-                const localPhoto = localStorage.getItem(`emp_photo_${cleanEmp}_${cleanStore}`) || localStorage.getItem(`emp_photo_${cleanEmp}`);
-                if (localPhoto) {
-                    document.getElementById('emp-avatar-img').src = localPhoto;
-                }
-            }
-
-            // 2. معالجة شعار المركز
-            if (urlLogo) {
-                try {
-                    // إذا كان هناك عنصر مخصص للشعار أو يتم تمريره
-                    const brandSpan = document.getElementById('store-brand-name');
-                    if (brandSpan) {
-                        const decodedLogo = decodeURIComponent(urlLogo);
-                        if (decodedLogo.startsWith('http') || decodedLogo.startsWith('data:image')) {
-                            brandSpan.innerHTML = `<img src="${decodedLogo}" alt="شعار المركز" style="max-height: 25px; vertical-align: middle; border-radius: 4px;">`;
-                        }
-                    }
-                } catch(e) {}
+        // جلب صورة الموظف المعينة
+        if (urlPhoto) {
+            try {
+                document.getElementById('emp-avatar-img').src = decodeURIComponent(urlPhoto);
+            } catch(e) {}
+        } else {
+            const cleanEmp = empName.trim();
+            const cleanStore = storeName.trim();
+            const localPhoto = localStorage.getItem(`emp_photo_${cleanEmp}_${cleanStore}`) || localStorage.getItem(`emp_photo_${cleanEmp}`);
+            if (localPhoto) {
+                document.getElementById('emp-avatar-img').src = localPhoto;
             }
         }
-
-        loadMediaAssets();
 
         let selectedRatingValue = 5;
         let selectedRatingText = '😁 ممتاز';
@@ -371,15 +351,15 @@
             if(defaultBtn) defaultBtn.classList.add('selected');
         });
 
-        function setRating(val, text) {
+        function setRating(val, text, btnElement) {
             selectedRatingValue = val;
             selectedRatingText = text;
             
             document.querySelectorAll('.rating-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('selected');
+            if (btnElement) {
+                btnElement.classList.add('selected');
             }
         }
 
