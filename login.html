@@ -176,7 +176,7 @@
                     throw new Error('بيانات الدخول غير مطابقة');
                 }
 
-                // حفظ بيانات الشركة المشتركة في الذاكرة المحلية للجلسة
+                // حفظ بيانات الشركة المشتركة في الذاكرة المحلية للجلسة مع البريد لضمان الفلترة الدقيقة
                 localStorage.setItem('client_name', data.company_name);
                 localStorage.setItem('client_logo', data.logo_url || '');
                 localStorage.setItem('client_email', data.email);
