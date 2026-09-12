@@ -32,7 +32,7 @@
             margin: 0 auto;
         }
 
-        /* ترويسة الموقع (تتغير بناءً على اسم وشعار العميل المشترك) */
+        /* ترويسة الموقع */
         .main-header {
             background: var(--bg-card);
             padding: 25px 35px;
@@ -514,13 +514,18 @@
 
         let allEvaluations = [];
         
-        // بيانات افتراضية للعميل في حال الدخول المباشر للتجربة
+        // جلب بيانات العميل المشترك المسجل حالياً من الجلسة
         let currentClient = {
-            name: localStorage.getItem('client_name') || 'مركز لافندر للتجميل',
-            logo: localStorage.getItem('client_logo') || ''
+            name: localStorage.getItem('client_name') || 'مركز التجميل',
+            logo: localStorage.getItem('client_logo') || '',
+            email: localStorage.getItem('client_email') || ''
         };
 
-        // تحديث الهوية البصرية للترويسة والبطاقات بناءً على بيانات العميل المشترك
+        // حماية الصفحة: إذا لم يكن هناك عميل مسجل، يتم توجيهه لصفحة الدخول
+        if (!currentClient.email) {
+            window.location.href = 'login.html';
+        }
+
         function initClientBranding() {
             document.getElementById('client-company-name').innerText = currentClient.name;
             
@@ -535,6 +540,7 @@
         function logoutClient() {
             localStorage.removeItem('client_name');
             localStorage.removeItem('client_logo');
+            localStorage.removeItem('client_email');
             window.location.href = 'login.html';
         }
 
@@ -552,9 +558,11 @@
 
         async function fetchEvaluations() {
             try {
+                // جلب التقييمات الخاصة بالشركة المشتركة الحالية حصرياً بناءً على البريد الإلكتروني
                 const { data, error } = await supabaseClient
                     .from('evaluations')
                     .select('*')
+                    .eq('client_email', currentClient.email)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
@@ -647,7 +655,7 @@
             renderData(filtered);
         }
 
-        // توليد البطاقة مع اسم وشعار العميل المشترك
+        // توليد البطاقة مع تمرير بريد الشركة المشتركة في رابط الـ QR
         function generateEmployeeBadge() {
             const name = document.getElementById('emp-name').value.trim();
             const title = document.getElementById('emp-title').value.trim();
@@ -669,7 +677,7 @@
             }
 
             const baseUrl = window.location.href.replace('dashboard.html', '').replace(/\/[^\/]*$/, '/');
-            const targetUrl = `${baseUrl}?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}`;
+            const targetUrl = `${baseUrl}rate.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
 
             const qrContainer = document.getElementById('card-qrcode');
             qrContainer.innerHTML = "";
