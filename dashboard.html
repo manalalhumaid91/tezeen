@@ -25,11 +25,17 @@
             margin: 0;
             padding: 20px;
             color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .container {
             max-width: 1100px;
             margin: 0 auto;
+            flex: 1;
+            width: 100%;
         }
 
         .main-header {
@@ -83,6 +89,29 @@
             color: var(--text-muted);
             margin: 0;
             font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .settings-btn {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border: 1px solid #dbeafe;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: #e0f2fe;
         }
 
         .logout-btn {
@@ -371,6 +400,53 @@
             background: #047857;
         }
 
+        /* نافذة إعدادات المتجر والشعار */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .settings-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 400px;
+            max-width: 90%;
+            box-sizing: border-box;
+            text-align: right;
+        }
+
+        .settings-content h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        /* تنسيق الفوتر (تزين) */
+        .main-footer-tazeen {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .main-footer-tazeen span {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
         @media print {
             body * {
                 visibility: hidden;
@@ -401,7 +477,10 @@
                     <p>لوحة التحكم لإدارة الموظفين والتقييمات</p>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logoutClient()">تسجيل الخروج</button>
+            <div class="header-actions">
+                <button class="settings-btn" onclick="openSettingsModal()">⚙️ إعدادات المتجر والشعار</button>
+                <button class="logout-btn" onclick="logoutClient()">تسجيل الخروج</button>
+            </div>
         </header>
 
         <div class="dashboard-section">
@@ -470,11 +549,11 @@
                 <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، الموظف، أو التعليق..." oninput="filterData()">
                 <select id="rating-filter" onchange="filterData()">
                     <option value="">جميع التقييمات</option>
-                    <option value="ممتاز">😁 ممتاز</option>
-                    <option value="جيد">🙂 جيد</option>
-                    <option value="متوسط">😐 متوسط</option>
-                    <option value="سيء">🙁 سيء</option>
-                    <option value="سيء جداً">😡 سيء جداً</option>
+                    <option value="5">😁 ممتاز</option>
+                    <option value="4">🙂 جيد</option>
+                    <option value="3">😐 متوسط</option>
+                    <option value="2">🙁 سيء</option>
+                    <option value="1">😡 سيء جداً</option>
                 </select>
             </div>
 
@@ -500,6 +579,28 @@
         </div>
     </div>
 
+    <!-- نافذة إعدادات اسم المتجر وشعار الشركة -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <h3>إعدادات اسم المتجر والشعار</h3>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="settings-store-name">اسم المتجر أو الشركة</label>
+                <input type="text" id="settings-store-name" placeholder="أدخل اسم المتجر...">
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="settings-logo-url">رابط شعار الشركة (URL)</label>
+                <input type="text" id="settings-logo-url" placeholder="ضع رابط صورة الشعار هنا...">
+            </div>
+            <button class="action-btn" onclick="saveClientSettings()">حفظ التغييرات</button>
+            <button class="settings-btn" style="width: 100%; margin-top: 10px; background: #e2e8f0; color: #334155;" onclick="closeSettingsModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- فوتر منصة تزين -->
+    <footer class="main-footer-tazeen">
+        جميع الحقوق محفوظة &copy; 2026 | منصة <span>تزين</span> للخدمات والتقييمات الذكية
+    </footer>
+
     <script>
         const SUPABASE_URL = 'https://tmiqnvzlnnvhjswkkdrk.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
@@ -524,6 +625,35 @@
             } else {
                 document.getElementById('client-logo-text').innerText = currentClient.name.charAt(0);
             }
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settings-store-name').value = currentClient.name;
+            document.getElementById('settings-logo-url').value = currentClient.logo;
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function saveClientSettings() {
+            const newName = document.getElementById('settings-store-name').value.trim();
+            const newLogo = document.getElementById('settings-logo-url').value.trim();
+
+            if (!newName) {
+                alert('الرجاء إدخال اسم المتجر!');
+                return;
+            }
+
+            currentClient.name = newName;
+            currentClient.logo = newLogo;
+
+            localStorage.setItem('client_name', newName);
+            localStorage.setItem('client_logo', newLogo);
+
+            initClientBranding();
+            closeSettingsModal();
         }
 
         function logoutClient() {
@@ -612,7 +742,7 @@
         }
 
         function filterData() {
-            const selectedRating = document.getElementById('rating-filter').value.toLowerCase().trim();
+            const selectedRating = document.getElementById('rating-filter').value.trim();
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
 
             const filtered = allEvaluations.filter(item => {
@@ -661,7 +791,6 @@
                 document.getElementById('card-avatar').src = photo;
             }
 
-            // توليد رابط آمن ومباشر يشير تماماً إلى index.html بدون أخطاء مسار
             const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
             const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
 
