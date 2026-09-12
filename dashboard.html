@@ -794,7 +794,6 @@
             const processBadgeCreation = (photoBase64) => {
                 if (photoBase64) {
                     document.getElementById('card-avatar').src = photoBase64;
-                    // تخزين الصورة في الذاكرة المحلية برمز فريد للموظف لتجنب تضخم حجم رابط الـ QR
                     localStorage.setItem(`emp_photo_${name}_${store}`, photoBase64);
                 } else {
                     document.getElementById('card-avatar').src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
@@ -802,7 +801,6 @@
 
                 const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
                 
-                // الرابط الآن قصير ونظيف وخالي من أي أخطاء في الـ QR
                 const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}`;
 
                 const qrContainer = document.getElementById('card-qrcode');
