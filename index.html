@@ -44,7 +44,6 @@
             text-align: center;
         }
 
-        /* حاوية مركزية تجمع الصورة واسم المركز لضمان توسطهما معاً تماماً */
         .header-profile-section {
             text-align: center;
             margin-bottom: 15px;
@@ -166,7 +165,6 @@
             background: #1e40af;
         }
 
-        /* شاشة الشكر الأصلية المعتمدة تماماً كما هي بدون أي تغيير */
         .thank-you {
             display: none;
             text-align: center;
@@ -256,7 +254,6 @@
 <body>
 
     <div class="card" id="rating-card">
-        <!-- حاوية الصورة وتحتها اسم المركز متمركزة تماماً في المنتصف -->
         <div class="header-profile-section">
             <img id="emp-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-avatar">
             <div>
@@ -295,7 +292,6 @@
         </form>
     </div>
 
-    <!-- شاشة الشكر الأصلية المعتمدة -->
     <div class="card thank-you" id="thank-you-card">
         <div class="success-icon-container">
             <svg viewBox="0 0 24 24">
@@ -332,8 +328,22 @@
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        const photoKey = `emp_photo_${empName}_${storeName}`;
-        const savedPhoto = localStorage.getItem(photoKey);
+        // جلب الصورة من الذاكرة المحلية بأكثر من صيغة لضمان مطابقتها تماماً لما تحفظه لوحة التحكم
+        const photoKey1 = `emp_photo_${empName}_${storeName}`;
+        const photoKey2 = `emp_photo_${empName}`;
+        let savedPhoto = localStorage.getItem(photoKey1) || localStorage.getItem(photoKey2);
+        
+        // إذا لم توجد، البحث في مفاتيح الذاكرة المحلية عن أي صورة مطابقة لاسم الموظفة
+        if (!savedPhoto) {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes(empName) && key.startsWith('emp_photo_')) {
+                    savedPhoto = localStorage.getItem(key);
+                    break;
+                }
+            }
+        }
+
         if (savedPhoto) {
             document.getElementById('emp-avatar-img').src = savedPhoto;
         }
