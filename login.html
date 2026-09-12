@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول العملاء - منصة التقييمات</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-light: #f0f6ff;
+            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.05);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .logo-badge {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        }
+
+        .login-card h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            font-weight: 700;
+        }
+
+        .login-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0 0 25px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            outline: none;
+            background: #fafafa;
+            box-sizing: border-box;
+        }
+
+        .login-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        }
+
+        .login-btn:hover {
+            background: #1e40af;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-badge">تـ</div>
+        <h1>بوابة دخول المشتركين</h1>
+        <p>أدخل بيانات متجرك أو مركزك للوصول للوحة التحكم</p>
+
+        <div class="form-group">
+            <label for="client-name">اسم الشركة أو المركز التجاري</label>
+            <input type="text" id="client-name" placeholder="مثال: مركز لافندر للتجميل">
+        </div>
+
+        <div class="form-group">
+            <label for="client-logo">رابط شعار الشركة (اختياري)</label>
+            <input type="text" id="client-logo" placeholder="ضع رابط شعار شركتك هنا...">
+        </div>
+
+        <button class="login-btn" onclick="handleLogin()">دخول لوحة التحكم</button>
+    </div>
+
+    <script>
+        function handleLogin() {
+            const name = document.getElementById('client-name').value.trim();
+            const logo = document.getElementById('client-logo').value.trim();
+
+            if (!name) {
+                alert('الرجاء إدخال اسم الشركة أو المركز!');
+                return;
+            }
+
+            // حفظ بيانات العميل في الذاكرة المحلية للجلسة
+            localStorage.setItem('client_name', name);
+            if (logo) {
+                localStorage.setItem('client_logo', logo);
+            }
+
+            // الانتقال للوحة التحكم الخاصة به
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
