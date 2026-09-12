@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تزين - لوحة التحكم وإدارة البطاقات</title>
+    <title>لوحة التحكم المركزية - إدارة الموظفين والتقييمات</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
@@ -32,7 +32,7 @@
             margin: 0 auto;
         }
 
-        /* ترويسة الموقع والشعار */
+        /* ترويسة الموقع (تتغير بناءً على اسم وشعار العميل المشترك) */
         .main-header {
             background: var(--bg-card);
             padding: 25px 35px;
@@ -60,13 +60,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 700;
+            overflow: hidden;
             box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
         }
 
+        .brand-logo-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .brand-text h1 {
-            font-size: 24px;
+            font-size: 22px;
             color: var(--primary-color);
             margin: 0 0 4px 0;
             font-weight: 700;
@@ -79,7 +86,24 @@
             font-weight: 600;
         }
 
-        /* الأقسام الرئيسية (لوحة التحكم والبطاقات) */
+        .logout-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fecaca;
+        }
+
+        /* الأقسام والبطاقات */
         .dashboard-section {
             background: var(--bg-card);
             padding: 30px;
@@ -95,12 +119,8 @@
             margin-top: 0;
             margin-bottom: 20px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        /* شبكة الإحصائيات الثلاثة */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -136,7 +156,6 @@
             margin: 0;
         }
 
-        /* شريط الفلترة والبحث */
         .filter-section {
             display: flex;
             gap: 15px;
@@ -165,7 +184,6 @@
             flex: 1;
         }
 
-        /* جدول التقييمات */
         .eval-table {
             width: 100%;
             border-collapse: collapse;
@@ -200,7 +218,6 @@
             font-weight: 600;
         }
 
-        /* قسم تسجيل موظف وتوليد البطاقة المستطيلة */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -253,7 +270,7 @@
             background: #1e40af;
         }
 
-        /* تصميم البطاقة المستطيلة للتعليق (Card Holder) */
+        /* تصميم البطاقة المستطيلة الخاصة بالعميل المشترك */
         .badge-preview-area {
             margin-top: 25px;
             padding-top: 20px;
@@ -309,7 +326,7 @@
             font-weight: 600;
         }
 
-        .badge-company {
+        .badge-company-tag {
             font-size: 10px;
             background: var(--primary-light);
             color: var(--primary-color);
@@ -377,19 +394,21 @@
 <body>
 
     <div class="container">
-        <!-- ترويسة الموقع -->
+        <!-- ترويسة العميل المشترك -->
         <header class="main-header">
             <div class="brand-container">
-                <div class="brand-logo-badge">تـ</div>
+                <div class="brand-logo-badge" id="client-logo-container">
+                    <span id="client-logo-text">عـ</span>
+                </div>
                 <div class="brand-text">
-                    <h1>منصة تزين | Tazeen</h1>
-                    <p>لوحة التحكم المركزية وإدارة الموظفين</p>
+                    <h1 id="client-company-name">اسم الشركة أو المركز</h1>
+                    <p>لوحة التحكم لإدارة الموظفين والتقييمات</p>
                 </div>
             </div>
-            <button class="print-btn" onclick="fetchEvaluations()">🔄 تحديث البيانات</button>
+            <button class="logout-btn" onclick="logoutClient()">تسجيل الخروج</button>
         </header>
 
-        <!-- القسم الأول: إضافة موظف وتوليد بطاقة QR المستطيلة -->
+        <!-- القسم الأول: تسجيل موظف وتوليد البطاقة المستطيلة -->
         <div class="dashboard-section">
             <h2 class="section-title">🪪 تسجيل موظف جديد وتوليد بطاقة QR الفورية</h2>
             
@@ -400,11 +419,11 @@
                 </div>
                 <div class="form-group">
                     <label for="emp-title">المسمى الوظيفي</label>
-                    <input type="text" id="emp-title" placeholder="مثال: أخصائية خدمة عملاء">
+                    <input type="text" id="emp-title" placeholder="مثال: أخصائية تجميل">
                 </div>
                 <div class="form-group">
                     <label for="emp-store">فرع العمل</label>
-                    <input type="text" id="emp-store" placeholder="مثال: فرع التحلية">
+                    <input type="text" id="emp-store" placeholder="مثال: الفرع الرئيسي">
                 </div>
                 <div class="form-group">
                     <label for="emp-photo">رابط الصورة الشخصية (URL)</label>
@@ -414,13 +433,13 @@
 
             <button class="action-btn" onclick="generateEmployeeBadge()">إنشاء البطاقة وعرضها للطباعة</button>
 
-            <!-- معاينة البطاقة -->
+            <!-- معاينة البطاقة المستطيلة التي تحمل اسم وشعار العميل -->
             <div class="badge-preview-area" id="badgePreviewArea">
                 <div class="employee-badge-card">
                     <div class="badge-info">
                         <img id="card-avatar" src="" alt="صورة الموظف" class="badge-avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'">
                         <div class="badge-details">
-                            <span class="badge-company">منصة تزين | Tazeen</span>
+                            <span class="badge-company-tag" id="card-company-name">اسم الشركة</span>
                             <h3 id="card-name">اسم الموظف</h3>
                             <p id="card-title">المسمى الوظيفي</p>
                             <p id="card-store" style="color: var(--primary-color); font-size: 11px; font-weight: 700;">الفرع</p>
@@ -431,7 +450,7 @@
                         <span>امسح للتقييم</span>
                     </div>
                 </div>
-                <button class="print-btn" onclick="window.print()">🖨️ طباعة البطاقة / حفظ كـ PDF لحامل الكاردز</button>
+                <button class="print-btn" onclick="window.print()">🖨️ طباعة البطاقة / حفظ كـ PDF</button>
             </div>
         </div>
 
@@ -439,7 +458,6 @@
         <div class="dashboard-section">
             <h2 class="section-title">📊 سجل التقييمات والإحصائيات العامة</h2>
 
-            <!-- الإحصائيات الثلاثة -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>إجمالي التقييمات</h3>
@@ -455,17 +473,8 @@
                 </div>
             </div>
 
-            <!-- الفلترة والبحث -->
             <div class="filter-section">
-                <select id="store-filter" onchange="filterData()">
-                    <option value="">جميع الفروع</option>
-                    <option value="فرع الرياض">فرع الرياض</option>
-                    <option value="فرع التحلية">فرع التحلية</option>
-                    <option value="فرع الدمام">فرع الدمام</option>
-                </select>
-
                 <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، الموظف، أو التعليق..." oninput="filterData()">
-
                 <select id="rating-filter" onchange="filterData()">
                     <option value="">جميع التقييمات</option>
                     <option value="ممتاز">😁 ممتاز</option>
@@ -476,7 +485,6 @@
                 </select>
             </div>
 
-            <!-- جدول البيانات -->
             <div style="overflow-x: auto;">
                 <table class="eval-table">
                     <thead>
@@ -491,7 +499,7 @@
                     </thead>
                     <tbody id="evaluations-list">
                         <tr>
-                            <td colspan="6" class="no-data">جاري جلب البيانات من قاعدة البيانات...</td>
+                            <td colspan="6" class="no-data">جاري جلب البيانات...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -505,8 +513,31 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allEvaluations = [];
+        
+        // بيانات افتراضية للعميل في حال الدخول المباشر للتجربة
+        let currentClient = {
+            name: localStorage.getItem('client_name') || 'مركز لافندر للتجميل',
+            logo: localStorage.getItem('client_logo') || ''
+        };
 
-        // دالة تحويل النصوص التعبيرية إلى قيم رقمية للحسابات الدقيقة
+        // تحديث الهوية البصرية للترويسة والبطاقات بناءً على بيانات العميل المشترك
+        function initClientBranding() {
+            document.getElementById('client-company-name').innerText = currentClient.name;
+            
+            const logoContainer = document.getElementById('client-logo-container');
+            if (currentClient.logo) {
+                logoContainer.innerHTML = `<img src="${currentClient.logo}" alt="شعار العميل">`;
+            } else {
+                document.getElementById('client-logo-text').innerText = currentClient.name.charAt(0);
+            }
+        }
+
+        function logoutClient() {
+            localStorage.removeItem('client_name');
+            localStorage.removeItem('client_logo');
+            window.location.href = 'login.html';
+        }
+
         function parseRatingValue(val) {
             if (!val) return 0;
             const str = String(val).trim().toLowerCase();
@@ -515,7 +546,6 @@
             if (str === '3' || str.includes('متوسط') || str.includes('😐')) return 3;
             if (str === '2' || str.includes('سيء') || str.includes('🙁')) return 2;
             if (str === '1' || str.includes('سيء جداً') || str.includes('😡')) return 1;
-            
             const num = Number(val);
             return isNaN(num) ? 0 : num;
         }
@@ -528,13 +558,11 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-
                 allEvaluations = data || [];
                 renderData(allEvaluations);
-
             } catch (err) {
                 console.error(err);
-                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data" style="color: red;">خطأ في الاتصال بقاعدة البيانات: ${err.message}</td></tr>`;
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data" style="color: red;">خطأ في جلب البيانات: ${err.message}</td></tr>`;
             }
         }
 
@@ -559,7 +587,6 @@
                 if (numericRating >= 4) positiveCount++;
 
                 let emojiText = item.rating || 'متوسط';
-                // تنسيق العرض النصي والإيموجي
                 if (numericRating === 5) emojiText = '😁 ممتاز';
                 else if (numericRating === 4) emojiText = '🙂 جيد';
                 else if (numericRating === 3) emojiText = '😐 متوسط';
@@ -567,7 +594,7 @@
                 else if (numericRating === 1) emojiText = '😡 سيء جداً';
 
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : '-';
-                const storeText = item.store_id ? `${item.store_id}` : 'فرع عام';
+                const storeText = item.store_id ? `${item.store_id}` : 'الفرع الرئيسي';
                 const empText = item.emp_id ? ` / ${item.emp_id}` : '';
 
                 rowsHtml += `
@@ -591,19 +618,14 @@
         }
 
         function filterData() {
-            const selectedStore = document.getElementById('store-filter').value.toLowerCase().trim();
             const selectedRating = document.getElementById('rating-filter').value.toLowerCase().trim();
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
 
             const filtered = allEvaluations.filter(item => {
                 const numVal = parseRatingValue(item.rating);
-                
-                const matchesStore = selectedStore === "" || (item.store_id && item.store_id.toLowerCase().includes(selectedStore));
-                
                 let matchesRating = true;
                 if (selectedRating !== "") {
-                    const filterNum = parseRatingValue(selectedRating);
-                    matchesRating = (numVal === filterNum);
+                    matchesRating = (numVal === parseRatingValue(selectedRating));
                 }
                 
                 const name = (item.customer_name || '').toLowerCase();
@@ -619,13 +641,13 @@
                     store.includes(searchQuery) ||
                     emp.includes(searchQuery);
 
-                return matchesStore && matchesRating && matchesSearch;
+                return matchesRating && matchesSearch;
             });
 
             renderData(filtered);
         }
 
-        // توليد بطاقة الموظف المستطيلة الفورية
+        // توليد البطاقة مع اسم وشعار العميل المشترك
         function generateEmployeeBadge() {
             const name = document.getElementById('emp-name').value.trim();
             const title = document.getElementById('emp-title').value.trim();
@@ -640,11 +662,12 @@
             document.getElementById('card-name').innerText = name;
             document.getElementById('card-title').innerText = title || 'أخصائي خدمة عملاء';
             document.getElementById('card-store').innerText = store;
+            document.getElementById('card-company-name').innerText = currentClient.name;
+            
             if (photo) {
                 document.getElementById('card-avatar').src = photo;
             }
 
-            // رابط التقييم المباشر
             const baseUrl = window.location.href.replace('dashboard.html', '').replace(/\/[^\/]*$/, '/');
             const targetUrl = `${baseUrl}?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}`;
 
@@ -663,7 +686,7 @@
             document.getElementById('badgePreviewArea').style.display = 'block';
         }
 
-        // جلب البيانات أول ما تفتح الصفحة
+        initClientBranding();
         fetchEvaluations();
     </script>
 </body>
