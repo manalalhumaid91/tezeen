@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تزين - لوحة التحكم والتقييمات وإدارة البطاقات</title>
+    <title>تزين - لوحة التحكم وإدارة البطاقات</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
@@ -32,7 +32,7 @@
             margin: 0 auto;
         }
 
-        /* ترويسة الموقع وشعار تزين المعتمد */
+        /* ترويسة الموقع والشعار */
         .main-header {
             background: var(--bg-card);
             padding: 25px 35px;
@@ -70,7 +70,6 @@
             color: var(--primary-color);
             margin: 0 0 4px 0;
             font-weight: 700;
-            letter-spacing: -0.5px;
         }
 
         .brand-text p {
@@ -80,39 +79,25 @@
             font-weight: 600;
         }
 
-        /* نظام التبويبات (Tabs) */
-        .tabs-nav {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .tab-btn {
+        /* الأقسام الرئيسية (لوحة التحكم والبطاقات) */
+        .dashboard-section {
             background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
-            padding: 12px 25px;
-            border-radius: 14px;
-            font-family: 'Cairo', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
+            margin-bottom: 30px;
         }
 
-        .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
+        .section-title {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* شبكة الإحصائيات الثلاثة */
@@ -130,23 +115,22 @@
         }
 
         .stat-card {
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #dbeafe;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.02);
         }
 
         .stat-card h3 {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
             font-weight: 600;
         }
 
         .stat-card .number {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             color: var(--primary-color);
             margin: 0;
@@ -154,16 +138,11 @@
 
         /* شريط الفلترة والبحث */
         .filter-section {
-            background: var(--bg-card);
-            padding: 15px 20px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 25px;
             display: flex;
             gap: 15px;
             align-items: center;
             flex-wrap: wrap;
-            box-shadow: 0 2px 10px rgba(30, 58, 138, 0.02);
+            margin-bottom: 20px;
         }
 
         .filter-section select, .filter-section input {
@@ -186,46 +165,7 @@
             flex: 1;
         }
 
-        /* قسم جدول التقييمات */
-        .evaluations-section {
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .section-header h2 {
-            font-size: 18px;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .refresh-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background 0.2s;
-            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
-        }
-
-        .refresh-btn:hover {
-            background: #1e40af;
-        }
-
+        /* جدول التقييمات */
         .eval-table {
             width: 100%;
             border-collapse: collapse;
@@ -244,13 +184,9 @@
             background: var(--primary-light);
         }
 
-        .eval-table tr:hover {
-            background: #fafafa;
-        }
-
         .no-data {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: var(--text-muted);
             font-size: 14px;
         }
@@ -258,22 +194,13 @@
         .badge-emp {
             background: var(--primary-light);
             color: var(--primary-color);
-            padding: 5px 10px;
+            padding: 4px 10px;
             border-radius: 8px;
             font-size: 11px;
             font-weight: 600;
-            display: inline-block;
         }
 
-        /* تبويب إدارة الموظفين وتوليد البطاقات */
-        .card-generator-box {
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
-        }
-
+        /* قسم تسجيل موظف وتوليد البطاقة المستطيلة */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -285,14 +212,6 @@
             .form-grid {
                 grid-template-columns: 1fr;
             }
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group.full-width {
-            grid-column: span 2;
         }
 
         .form-group label {
@@ -312,22 +231,41 @@
             font-size: 14px;
             outline: none;
             background: #fafafa;
-            color: var(--text-main);
             box-sizing: border-box;
         }
 
-        /* تصميم بطاقة التقييم المستطيلة للتعليق (Card Holder Ready) */
-        .badge-preview-container {
-            margin-top: 30px;
-            padding-top: 25px;
+        .action-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        }
+
+        .action-btn:hover {
+            background: #1e40af;
+        }
+
+        /* تصميم البطاقة المستطيلة للتعليق (Card Holder) */
+        .badge-preview-area {
+            margin-top: 25px;
+            padding-top: 20px;
             border-top: 2px dashed var(--border-color);
+            display: none;
             text-align: center;
         }
 
         .employee-badge-card {
             width: 420px;
             max-width: 100%;
-            margin: 0 auto;
+            margin: 0 auto 15px auto;
             background: white;
             border: 2px solid var(--primary-color);
             border-radius: 16px;
@@ -336,7 +274,6 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 10px 25px rgba(30, 58, 138, 0.1);
-            position: relative;
             box-sizing: border-box;
             text-align: right;
             direction: rtl;
@@ -408,15 +345,12 @@
             background: #059669;
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 12px;
+            padding: 10px 25px;
+            border-radius: 10px;
             cursor: pointer;
             font-family: 'Cairo', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
-            transition: background 0.2s;
         }
 
         .print-btn:hover {
@@ -435,7 +369,6 @@
                 left: 50%;
                 top: 50%;
                 transform: translate(-50%, -50%);
-                box-shadow: none;
                 border: 2px solid #000;
             }
         }
@@ -444,25 +377,68 @@
 <body>
 
     <div class="container">
-        <!-- ترويسة الموقع مع شعار تزين البارز -->
+        <!-- ترويسة الموقع -->
         <header class="main-header">
             <div class="brand-container">
                 <div class="brand-logo-badge">تـ</div>
                 <div class="brand-text">
                     <h1>منصة تزين | Tazeen</h1>
-                    <p>لوحة التحكم المركزية وإدارة البطاقات</p>
+                    <p>لوحة التحكم المركزية وإدارة الموظفين</p>
                 </div>
             </div>
+            <button class="print-btn" onclick="fetchEvaluations()">🔄 تحديث البيانات</button>
         </header>
 
-        <!-- أزرار التبويبات -->
-        <div class="tabs-nav">
-            <button class="tab-btn active" onclick="switchTab('evaluations')">📊 سجل التقييمات والإحصائيات</button>
-            <button class="tab-btn" onclick="switchTab('cards')">🪪 إضافة موظف وتوليد بطاقة QR</button>
+        <!-- القسم الأول: إضافة موظف وتوليد بطاقة QR المستطيلة -->
+        <div class="dashboard-section">
+            <h2 class="section-title">🪪 تسجيل موظف جديد وتوليد بطاقة QR الفورية</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="emp-name">اسم الموظف الكامل</label>
+                    <input type="text" id="emp-name" placeholder="مثال: سارة أحمد">
+                </div>
+                <div class="form-group">
+                    <label for="emp-title">المسمى الوظيفي</label>
+                    <input type="text" id="emp-title" placeholder="مثال: أخصائية خدمة عملاء">
+                </div>
+                <div class="form-group">
+                    <label for="emp-store">فرع العمل</label>
+                    <input type="text" id="emp-store" placeholder="مثال: فرع التحلية">
+                </div>
+                <div class="form-group">
+                    <label for="emp-photo">رابط الصورة الشخصية (URL)</label>
+                    <input type="text" id="emp-photo" placeholder="ضع رابط صورة الموظف هنا...">
+                </div>
+            </div>
+
+            <button class="action-btn" onclick="generateEmployeeBadge()">إنشاء البطاقة وعرضها للطباعة</button>
+
+            <!-- معاينة البطاقة -->
+            <div class="badge-preview-area" id="badgePreviewArea">
+                <div class="employee-badge-card">
+                    <div class="badge-info">
+                        <img id="card-avatar" src="" alt="صورة الموظف" class="badge-avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'">
+                        <div class="badge-details">
+                            <span class="badge-company">منصة تزين | Tazeen</span>
+                            <h3 id="card-name">اسم الموظف</h3>
+                            <p id="card-title">المسمى الوظيفي</p>
+                            <p id="card-store" style="color: var(--primary-color); font-size: 11px; font-weight: 700;">الفرع</p>
+                        </div>
+                    </div>
+                    <div class="badge-qr-side">
+                        <div id="card-qrcode"></div>
+                        <span>امسح للتقييم</span>
+                    </div>
+                </div>
+                <button class="print-btn" onclick="window.print()">🖨️ طباعة البطاقة / حفظ كـ PDF لحامل الكاردز</button>
+            </div>
         </div>
 
-        <!-- محتوى تبويب التقييمات -->
-        <div id="tab-evaluations" class="tab-content active">
+        <!-- القسم الثاني: سجل التقييمات والإحصائيات -->
+        <div class="dashboard-section">
+            <h2 class="section-title">📊 سجل التقييمات والإحصائيات العامة</h2>
+
             <!-- الإحصائيات الثلاثة -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -474,113 +450,51 @@
                     <p class="number" id="avg-rating">0.0 / 5</p>
                 </div>
                 <div class="stat-card">
-                    <h3>الرضا العام</h3>
+                    <h3>نسبة الرضا العام</h3>
                     <p class="number" id="satisfaction-rate">0%</p>
                 </div>
             </div>
 
-            <!-- شريط الفلترة والبحث -->
+            <!-- الفلترة والبحث -->
             <div class="filter-section">
                 <select id="store-filter" onchange="filterData()">
                     <option value="">جميع الفروع</option>
                     <option value="فرع الرياض">فرع الرياض</option>
-                    <option value="فرع جدة">فرع جدة</option>
+                    <option value="فرع التحلية">فرع التحلية</option>
                     <option value="فرع الدمام">فرع الدمام</option>
                 </select>
 
-                <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterData()">
+                <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، الموظف، أو التعليق..." oninput="filterData()">
 
                 <select id="rating-filter" onchange="filterData()">
                     <option value="">جميع التقييمات</option>
-                    <option value="5">😁 ممتاز (5)</option>
-                    <option value="4">🙂 جيد (4)</option>
-                    <option value="3">😐 متوسط (3)</option>
-                    <option value="2">🙁 سيء (2)</option>
-                    <option value="1">😡 سيء جداً (1)</option>
+                    <option value="ممتاز">😁 ممتاز</option>
+                    <option value="جيد">🙂 جيد</option>
+                    <option value="متوسط">😐 متوسط</option>
+                    <option value="سيء">🙁 سيء</option>
+                    <option value="سيء جداً">😡 سيء جداً</option>
                 </select>
             </div>
 
-            <!-- جدول التقييمات -->
-            <div class="evaluations-section">
-                <div class="section-header">
-                    <h2>سجل التقييمات الواردة</h2>
-                    <button class="refresh-btn" onclick="fetchEvaluations()">تحديث البيانات</button>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="eval-table">
-                        <thead>
-                            <tr>
-                                <th>التقييم</th>
-                                <th>اسم العميل</th>
-                                <th>رقم الجوال</th>
-                                <th>التعليق</th>
-                                <th>الموظف</th>
-                                <th>الوقت</th>
-                            </tr>
-                        </thead>
-                        <tbody id="evaluations-list">
-                            <tr>
-                                <td colspan="6" class="no-data">جاري جلب البيانات...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- محتوى تبويب إضافة موظف وتوليد البطاقات -->
-        <div id="tab-cards" class="tab-content">
-            <div class="card-generator-box">
-                <div class="section-header">
-                    <h2>إضافة موظف جديد وتوليد بطاقة QR المستطيلة</h2>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="emp-input-name">اسم الموظف الكامل</label>
-                        <input type="text" id="emp-input-name" placeholder="مثال: سارة أحمد">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp-input-title">المسمى الوظيفي</label>
-                        <input type="text" id="emp-input-title" placeholder="مثال: أخصائية خدمة عملاء">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp-input-store">فرع العمل</label>
-                        <input type="text" id="emp-input-store" placeholder="مثال: فرع التحلية">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="emp-input-photo">رابط الصورة الشخصية (URL)</label>
-                        <input type="text" id="emp-input-photo" placeholder="ضع رابط صورة الموظف هنا...">
-                    </div>
-                </div>
-
-                <button class="refresh-btn" style="width: 100%; padding: 14px; font-size: 15px;" onclick="generateEmployeeBadge()">إنشاء وتوليد البطاقة الآن</button>
-
-                <!-- معاينة البطاقة المستطيلة -->
-                <div class="badge-preview-container" id="badgePreviewContainer" style="display: none;">
-                    <label style="display:block; font-weight:700; margin-bottom:15px; font-size:14px; color:var(--primary-color);">معاينة بطاقة الموظف (جاهزة للطباعة أو حوامل الكاردز):</label>
-                    
-                    <div class="employee-badge-card" id="printableBadge">
-                        <div class="badge-info">
-                            <img id="card-avatar" src="" alt="صورة الموظف" class="badge-avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'">
-                            <div class="badge-details">
-                                <span class="badge-company">منصة تزين | Tazeen</span>
-                                <h3 id="card-name">اسم الموظف</h3>
-                                <p id="card-title">المسمى الوظيفي</p>
-                                <p id="card-store" style="color: var(--primary-color); font-size: 11px;">الفرع</p>
-                            </div>
-                        </div>
-                        <div class="badge-qr-side">
-                            <div id="card-qrcode"></div>
-                            <span>امسح للتقييم</span>
-                        </div>
-                    </div>
-
-                    <button class="print-btn" onclick="window.print()">🖨️ طباعة البطاقة / حفظ كـ PDF</button>
-                </div>
+            <!-- جدول البيانات -->
+            <div style="overflow-x: auto;">
+                <table class="eval-table">
+                    <thead>
+                        <tr>
+                            <th>التقييم</th>
+                            <th>اسم العميل</th>
+                            <th>رقم الجوال</th>
+                            <th>التعليق</th>
+                            <th>الفرع / الموظف</th>
+                            <th>الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="evaluations-list">
+                        <tr>
+                            <td colspan="6" class="no-data">جاري جلب البيانات من قاعدة البيانات...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -592,18 +506,18 @@
 
         let allEvaluations = [];
 
-        // تبديل التبويبات
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            if (tabName === 'evaluations') {
-                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-                document.getElementById('tab-evaluations').classList.add('active');
-            } else {
-                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-                document.getElementById('tab-cards').classList.add('active');
-            }
+        // دالة تحويل النصوص التعبيرية إلى قيم رقمية للحسابات الدقيقة
+        function parseRatingValue(val) {
+            if (!val) return 0;
+            const str = String(val).trim().toLowerCase();
+            if (str === '5' || str.includes('ممتاز') || str.includes('😁')) return 5;
+            if (str === '4' || str.includes('جيد') || str.includes('🙂')) return 4;
+            if (str === '3' || str.includes('متوسط') || str.includes('😐')) return 3;
+            if (str === '2' || str.includes('سيء') || str.includes('🙁')) return 2;
+            if (str === '1' || str.includes('سيء جداً') || str.includes('😡')) return 1;
+            
+            const num = Number(val);
+            return isNaN(num) ? 0 : num;
         }
 
         async function fetchEvaluations() {
@@ -620,7 +534,7 @@
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data" style="color: red;">خطأ في جلب البيانات: ${err.message}</td></tr>`;
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data" style="color: red;">خطأ في الاتصال بقاعدة البيانات: ${err.message}</td></tr>`;
             }
         }
 
@@ -631,7 +545,7 @@
             if (totalCount === 0) {
                 document.getElementById('avg-rating').innerText = '0.0 / 5';
                 document.getElementById('satisfaction-rate').innerText = '0%';
-                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد بيانات مطابقة للبحث أو الفلتر</td></tr>`;
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مسجلة حتى الآن</td></tr>`;
                 return;
             }
 
@@ -640,28 +554,29 @@
             let rowsHtml = '';
 
             evaluations.forEach(item => {
-                const rating = Number(item.rating) || 0;
-                sum += rating;
-                if (rating >= 4) positiveCount++;
+                const numericRating = parseRatingValue(item.rating);
+                sum += numericRating;
+                if (numericRating >= 4) positiveCount++;
 
-                let emoji = '😐 متوسط';
-                if (rating == 5) emoji = '😁 ممتاز';
-                else if (rating == 4) emoji = '🙂 جيد';
-                else if (rating == 3) emoji = '😐 متوسط';
-                else if (rating == 2) emoji = '🙁 سيء';
-                else if (rating == 1) emoji = '😡 سيء جداً';
+                let emojiText = item.rating || 'متوسط';
+                // تنسيق العرض النصي والإيموجي
+                if (numericRating === 5) emojiText = '😁 ممتاز';
+                else if (numericRating === 4) emojiText = '🙂 جيد';
+                else if (numericRating === 3) emojiText = '😐 متوسط';
+                else if (numericRating === 2) emojiText = '🙁 سيء';
+                else if (numericRating === 1) emojiText = '😡 سيء جداً';
 
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : '-';
-                const storeText = item.store_id ? ` - ${item.store_id}` : '';
-                const empName = item.emp_id || 'سارة أحمد';
+                const storeText = item.store_id ? `${item.store_id}` : 'فرع عام';
+                const empText = item.emp_id ? ` / ${item.emp_id}` : '';
 
                 rowsHtml += `
                     <tr>
-                        <td><strong>${emoji}</strong></td>
-                        <td>${item.customer_name || 'غير مسجل'}</td>
-                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || 'غير مسجل'}</td>
-                        <td>${item.comment || 'بدون تعليق'}</td>
-                        <td><span class="badge-emp">معرف: ${empName}${storeText}</span></td>
+                        <td><strong>${emojiText}</strong></td>
+                        <td>${item.customer_name || 'زائر كريم'}</td>
+                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || '-'}</td>
+                        <td>${item.comment || 'بدون ملاحظات'}</td>
+                        <td><span class="badge-emp">${storeText}${empText}</span></td>
                         <td>${dateStr}</td>
                     </tr>
                 `;
@@ -677,14 +592,19 @@
 
         function filterData() {
             const selectedStore = document.getElementById('store-filter').value.toLowerCase().trim();
-            const selectedRating = document.getElementById('rating-filter').value;
+            const selectedRating = document.getElementById('rating-filter').value.toLowerCase().trim();
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
 
             const filtered = allEvaluations.filter(item => {
-                const itemRating = Number(item.rating);
+                const numVal = parseRatingValue(item.rating);
                 
                 const matchesStore = selectedStore === "" || (item.store_id && item.store_id.toLowerCase().includes(selectedStore));
-                const matchesRating = selectedRating === "" || itemRating === Number(selectedRating);
+                
+                let matchesRating = true;
+                if (selectedRating !== "") {
+                    const filterNum = parseRatingValue(selectedRating);
+                    matchesRating = (numVal === filterNum);
+                }
                 
                 const name = (item.customer_name || '').toLowerCase();
                 const mobile = (item.customer_mobile || '').toLowerCase();
@@ -705,12 +625,12 @@
             renderData(filtered);
         }
 
-        // توليد بطاقة الموظف المستطيلة
+        // توليد بطاقة الموظف المستطيلة الفورية
         function generateEmployeeBadge() {
-            const name = document.getElementById('emp-input-name').value.trim();
-            const title = document.getElementById('emp-input-title').value.trim();
-            const store = document.getElementById('emp-input-store').value.trim();
-            const photo = document.getElementById('emp-input-photo').value.trim();
+            const name = document.getElementById('emp-name').value.trim();
+            const title = document.getElementById('emp-title').value.trim();
+            const store = document.getElementById('emp-store').value.trim();
+            const photo = document.getElementById('emp-photo').value.trim();
 
             if (!name || !store) {
                 alert('الرجاء إدخال اسم الموظف والفرع على الأقل!');
@@ -718,13 +638,13 @@
             }
 
             document.getElementById('card-name').innerText = name;
-            document.getElementById('card-title').innerText = title || 'خدمة العملاء';
+            document.getElementById('card-title').innerText = title || 'أخصائي خدمة عملاء';
             document.getElementById('card-store').innerText = store;
             if (photo) {
                 document.getElementById('card-avatar').src = photo;
             }
 
-            // رابط التقييم المباشر للموظف والفرع
+            // رابط التقييم المباشر
             const baseUrl = window.location.href.replace('dashboard.html', '').replace(/\/[^\/]*$/, '/');
             const targetUrl = `${baseUrl}?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}`;
 
@@ -737,12 +657,13 @@
                 qr.make();
                 qrContainer.innerHTML = qr.createImgTag(4, 6);
             } catch (e) {
-                qrContainer.innerHTML = "خطأ في توليد الـ QR";
+                qrContainer.innerHTML = "خطأ في الـ QR";
             }
 
-            document.getElementById('badgePreviewContainer').style.display = 'block';
+            document.getElementById('badgePreviewArea').style.display = 'block';
         }
 
+        // جلب البيانات أول ما تفتح الصفحة
         fetchEvaluations();
     </script>
 </body>
