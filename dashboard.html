@@ -661,10 +661,9 @@
                 document.getElementById('card-avatar').src = photo;
             }
 
-            // توليد الرابط ليطابق index.html بشكل دقيق
-            const currentPath = window.location.href.split('?')[0];
-            const baseUrl = currentPath.replace('dashboard.html', '');
-            const targetUrl = `${baseUrl}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
+            // توليد رابط آمن ومباشر يشير تماماً إلى index.html بدون أخطاء مسار
+            const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
 
             const qrContainer = document.getElementById('card-qrcode');
             qrContainer.innerHTML = "";
