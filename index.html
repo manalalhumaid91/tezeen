@@ -44,31 +44,34 @@
             text-align: center;
         }
 
-        .store-brand {
-            font-size: 13px;
-            color: var(--primary-color);
-            background: var(--primary-light);
-            padding: 6px 16px;
-            border-radius: 20px;
-            display: inline-block;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
+        /* ترتيب العناصر: الصورة أولاً في المنتصف */
         .employee-avatar {
-            width: 95px;
-            height: 95px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid var(--primary-light);
             margin: 0 auto 15px auto;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             background: #e2e8f0;
+            display: block;
+        }
+
+        /* تحتها اسم المركز */
+        .store-brand {
+            font-size: 14px;
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 6px 18px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
 
         h2 {
-            font-size: 21px;
-            color: var(--primary-color);
+            font-size: 20px;
+            color: var(--text-main);
             margin: 0 0 6px 0;
             font-weight: 700;
         }
@@ -160,22 +163,77 @@
             background: #1e40af;
         }
 
+        /* تنسيق شاشة الشكر الأصلية المعتمدة تماماً كما طلبتِ */
         .thank-you {
             display: none;
             text-align: center;
-            padding: 20px 0;
+            padding: 15px 0;
+        }
+
+        .success-icon-container {
+            width: 80px;
+            height: 80px;
+            background: #ecfdf5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            border: 2px solid #10b981;
+        }
+
+        .success-icon-container svg {
+            width: 40px;
+            height: 40px;
+            fill: #10b981;
         }
 
         .thank-you h2 {
-            color: #059669;
             font-size: 24px;
-            margin-bottom: 10px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-weight: 700;
         }
 
         .thank-you p {
             color: var(--text-muted);
             font-size: 14px;
             font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .selected-emoji-display {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            padding: 15px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .selected-emoji-display span {
+            font-size: 28px;
+        }
+
+        .selected-emoji-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #d97706;
+        }
+
+        .reset-link {
+            display: block;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .reset-link:hover {
+            color: var(--primary-color);
         }
 
         .footer-tazeen {
@@ -195,12 +253,19 @@
 <body>
 
     <div class="card" id="rating-card">
-        <div class="store-brand" id="store-brand-name">اسم الشركة</div>
-        
+        <!-- الصورة في المنتصف -->
         <img id="emp-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-avatar">
         
+        <!-- تحتها اسم المركز -->
+        <div>
+            <span class="store-brand" id="store-brand-name">اسم المركز</span>
+        </div>
+        
+        <!-- تزين الخدمة مع اسم الموظف -->
         <h2 id="emp-name-title">تزين الخدمة</h2>
-        <p class="emp-subtitle" id="emp-store-title">نرجو تقييم خدمتنا في الفرع</p>
+        
+        <!-- الفرع -->
+        <p class="emp-subtitle" id="emp-store-title">الفرع</p>
 
         <form id="evaluation-form" onsubmit="submitEvaluation(event)">
             <div class="rating-container">
@@ -230,9 +295,22 @@
         </form>
     </div>
 
+    <!-- شاشة الشكر الأصلية المعتمدة بعلامة الصح، الإيموجي والعبارة -->
     <div class="card thank-you" id="thank-you-card">
-        <h2>شكراً لك! 🌟</h2>
-        <p>تم استلام تقييمك بنجاح، ونحن سعداء بخدمتك دائماً.</p>
+        <div class="success-icon-container">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+        </div>
+        <h2>شكراً لك</h2>
+        <p>تقييمك وصل.. وبـ رأيك تزين خدمتنا</p>
+        
+        <div class="selected-emoji-display">
+            <span id="chosen-emoji-icon">😁</span>
+            <span class="selected-emoji-text" id="chosen-emoji-label">ممتاز</span>
+        </div>
+
+        <a href="#" class="reset-link" onclick="location.reload(); return false;">Submit another response</a>
     </div>
 
     <footer class="footer-tazeen">
@@ -248,15 +326,14 @@
         const storeName = urlParams.get('store') || 'الفرع الرئيسي';
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
-        const companyName = urlParams.get('company') || 'اسم الشركة';
+        const companyName = urlParams.get('company') || 'اسم المركز';
 
-        // ضبط النصوص والعنوان المتفق عليه
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // جلب صورة الموظف المخزنة محلياً بناءً على اسم الموظف والفرع
-        const savedPhoto = localStorage.getItem(`emp_photo_${empName}_${storeName}`);
+        const photoKey = `emp_photo_${empName}_${storeName}`;
+        const savedPhoto = localStorage.getItem(photoKey);
         if (savedPhoto) {
             document.getElementById('emp-avatar-img').src = savedPhoto;
         }
@@ -306,6 +383,11 @@
                     ]);
 
                 if (error) throw error;
+
+                // تحديث الإيموجي المختار في شاشة الشكر بناءً على اختيار العميل
+                const parts = selectedRatingText.split(' ');
+                document.getElementById('chosen-emoji-icon').innerText = parts[0] || '😁';
+                document.getElementById('chosen-emoji-label').innerText = parts.slice(1).join(' ') || selectedRatingText;
 
                 document.getElementById('rating-card').style.display = 'none';
                 document.getElementById('thank-you-card').style.display = 'block';
