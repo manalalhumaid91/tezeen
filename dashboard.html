@@ -31,6 +31,27 @@
             margin: 0 auto;
         }
 
+        .brand-header {
+            background: var(--bg-card);
+            padding: 22px 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand-header h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin: 0;
+            font-weight: 700;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -73,13 +94,14 @@
         }
 
         .filter-section select, .filter-section input {
-            padding: 10px 14px;
+            padding: 11px 16px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
             font-family: 'Cairo', sans-serif;
             font-size: 13px;
             outline: none;
             background: #fafafa;
+            color: var(--text-main);
         }
 
         .filter-section input {
@@ -117,6 +139,11 @@
             font-family: 'Cairo', sans-serif;
             font-size: 12px;
             font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #1e40af;
         }
 
         .eval-table {
@@ -148,20 +175,28 @@
             font-size: 14px;
         }
 
-        .badge {
+        .badge-store {
+            display: inline-block;
             background: var(--primary-light);
             color: var(--primary-color);
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
+            margin-top: 3px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- الإحصائيات -->
+        <!-- ترويسة الشعار والفرع -->
+        <div class="brand-header">
+            <h1>لوحة تحكم تزين للتقييمات</h1>
+            <div id="filter-info" style="font-size: 13px; color: var(--text-muted); font-weight: 600;">جاري التحميل...</div>
+        </div>
+
+        <!-- إحصائيات عامة -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي التقييمات</h3>
@@ -169,15 +204,11 @@
             </div>
             <div class="stat-card">
                 <h3>متوسط التقييم العام</h3>
-                <p class="number" id="avg-rating">0.0 / 5</p>
-            </div>
-            <div class="stat-card">
-                <h3>الرضا العام</h3>
-                <p class="number" id="satisfaction-rate">0%</p>
+                <p class="number" id="avg-rating">0.0</p>
             </div>
         </div>
 
-        <!-- أدوات الفلترة والبحث -->
+        <!-- شريط البحث والفلترة -->
         <div class="filter-section">
             <select id="rating-filter" onchange="filterData()">
                 <option value="">جميع التقييمات</option>
@@ -194,7 +225,7 @@
         <div class="evaluations-section">
             <div class="section-header">
                 <h2>سجل التقييمات الواردة</h2>
-                <button class="refresh-btn" onclick="fetchEvaluations()">تحديث البيانات</button>
+                <button class="refresh-btn" onclick="fetchEvaluations()">تحديث</button>
             </div>
             <div style="overflow-x: auto;">
                 <table class="eval-table">
@@ -204,7 +235,7 @@
                             <th>اسم العميل</th>
                             <th>رقم الجوال</th>
                             <th>التعليق</th>
-                            <th>الموظف</th>
+                            <th>الموظف والفرع</th>
                             <th>الوقت</th>
                         </tr>
                     </thead>
@@ -237,6 +268,9 @@
 
                 if (storeId) {
                     query = query.eq('store_id', storeId);
+                    document.getElementById('filter-info').innerText = `فرع: ${storeId}`;
+                } else {
+                    document.getElementById('filter-info').innerText = `جميع الفروع`;
                 }
 
                 const { data, error } = await query;
@@ -256,20 +290,17 @@
             document.getElementById('total-count').innerText = totalCount;
 
             if (totalCount === 0) {
-                document.getElementById('avg-rating').innerText = '0.0 / 5';
-                document.getElementById('satisfaction-rate').innerText = '0%_';
-                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مطابقة للبحث</td></tr>`;
+                document.getElementById('avg-rating').innerText = '0.0';
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مطابقة للبحث أو الفلتر</td></tr>`;
                 return;
             }
 
             let sum = 0;
-            let positiveCount = 0;
             let rowsHtml = '';
 
             evaluations.forEach(item => {
                 const rating = item.rating || 0;
                 sum += rating;
-                if (rating >= 4) positiveCount++;
 
                 let emoji = '😐 متوسط';
                 if (rating == 5) emoji = '😁 ممتاز';
@@ -279,24 +310,26 @@
                 else if (rating == 1) emoji = '😡 سيء جداً';
 
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : '-';
+                const storeBadge = item.store_id ? `<span class="badge-store">فرع: ${item.store_id}</span>` : `<span class="badge-store" style="background:#f1f5f9; color:#64748b;">فرع عام</span>`;
+                const empName = item.emp_id || 'سارة أحمد';
 
                 rowsHtml += `
                     <tr>
                         <td><strong>${emoji}</strong></td>
                         <td>${item.customer_name || 'غير مسجل'}</td>
-                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || 'غير مسجل'}</td>
-                        <td>${item.comment || 'بدون تعليق'}</td>
-                        <td><span class="badge">معرف: ${item.emp_id || 'سارة أحمد'}</span></td>
+                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || '-'}</td>
+                        <td>${item.comment || '-'}</td>
+                        <td>
+                            <div>${empName}</div>
+                            ${storeBadge}
+                        </td>
                         <td>${dateStr}</td>
                     </tr>
                 `;
             });
 
             const avg = (sum / totalCount).toFixed(1);
-            const satisfaction = Math.round((positiveCount / totalCount) * 100);
-
-            document.getElementById('avg-rating').innerText = `${avg} / 5`;
-            document.getElementById('satisfaction-rate').innerText = `${satisfaction}%`;
+            document.getElementById('avg-rating').innerText = avg;
             document.getElementById('evaluations-list').innerHTML = rowsHtml;
         }
 
@@ -310,11 +343,13 @@
                 const name = (item.customer_name || '').toLowerCase();
                 const mobile = (item.customer_mobile || '').toLowerCase();
                 const comment = (item.comment || '').toLowerCase();
+                const store = (item.store_id || '').toLowerCase();
 
                 const matchesSearch = searchQuery === "" || 
                     name.includes(searchQuery) || 
                     mobile.includes(searchQuery) || 
-                    comment.includes(searchQuery);
+                    comment.includes(searchQuery) ||
+                    store.includes(searchQuery);
 
                 return matchesRating && matchesSearch;
             });
