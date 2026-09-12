@@ -27,35 +27,15 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
-        }
-
-        .header {
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
-            border: 1px solid var(--border-color);
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .header h1 {
-            font-size: 22px;
-            color: var(--primary-color);
-            margin: 0;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
@@ -74,10 +54,36 @@
         }
 
         .stat-card .number {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--primary-color);
             margin: 0;
+        }
+
+        .filter-section {
+            background: var(--bg-card);
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section select, .filter-section input {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .filter-section input {
+            flex: 1;
         }
 
         .evaluations-section {
@@ -88,11 +94,29 @@
             box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
         }
 
-        .evaluations-section h2 {
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
             font-size: 18px;
             color: var(--primary-color);
-            margin-top: 0;
-            margin-bottom: 20px;
+            margin: 0;
+        }
+
+        .refresh-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .eval-table {
@@ -123,16 +147,21 @@
             color: var(--text-muted);
             font-size: 14px;
         }
+
+        .badge {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">
-            <h1>لوحة تحكم تزين للتقييمات</h1>
-            <div id="filter-info" style="font-size: 13px; color: var(--text-muted);">جاري تحميل البيانات...</div>
-        </div>
-
+        <!-- الإحصائيات -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي التقييمات</h3>
@@ -140,12 +169,33 @@
             </div>
             <div class="stat-card">
                 <h3>متوسط التقييم العام</h3>
-                <p class="number" id="avg-rating">0.0</p>
+                <p class="number" id="avg-rating">0.0 / 5</p>
+            </div>
+            <div class="stat-card">
+                <h3>الرضا العام</h3>
+                <p class="number" id="satisfaction-rate">0%</p>
             </div>
         </div>
 
+        <!-- أدوات الفلترة والبحث -->
+        <div class="filter-section">
+            <select id="rating-filter" onchange="filterData()">
+                <option value="">جميع التقييمات</option>
+                <option value="5">😁 ممتاز (5)</option>
+                <option value="4">🙂 جيد (4)</option>
+                <option value="3">😐 متوسط (3)</option>
+                <option value="2">🙁 سيء (2)</option>
+                <option value="1">😡 سيء جداً (1)</option>
+            </select>
+            <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterData()">
+        </div>
+
+        <!-- جدول التقييمات -->
         <div class="evaluations-section">
-            <h2>سجل التقييمات الأخيرة</h2>
+            <div class="section-header">
+                <h2>سجل التقييمات الواردة</h2>
+                <button class="refresh-btn" onclick="fetchEvaluations()">تحديث البيانات</button>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="eval-table">
                     <thead>
@@ -154,13 +204,13 @@
                             <th>اسم العميل</th>
                             <th>رقم الجوال</th>
                             <th>التعليق</th>
-                            <th>الموظف/الفرع</th>
+                            <th>الموظف</th>
                             <th>الوقت</th>
                         </tr>
                     </thead>
                     <tbody id="evaluations-list">
                         <tr>
-                            <td colspan="6" class="no-data">جاري جلب التقييمات...</td>
+                            <td colspan="6" class="no-data">جاري جلب البيانات...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -176,6 +226,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const storeId = urlParams.get('store');
 
+        let allEvaluations = [];
+
         async function fetchEvaluations() {
             try {
                 let query = supabaseClient
@@ -185,16 +237,13 @@
 
                 if (storeId) {
                     query = query.eq('store_id', storeId);
-                    document.getElementById('filter-info').innerText = `عرض تقييمات الفرع: ${storeId}`;
-                } else {
-                    document.getElementById('filter-info').innerText = `عرض جميع الفروع`;
                 }
 
                 const { data, error } = await query;
-
                 if (error) throw error;
 
-                renderData(data || []);
+                allEvaluations = data || [];
+                renderData(allEvaluations);
 
             } catch (err) {
                 console.error(err);
@@ -207,41 +256,70 @@
             document.getElementById('total-count').innerText = totalCount;
 
             if (totalCount === 0) {
-                document.getElementById('avg-rating').innerText = '0.0';
-                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مسجلة حتى الآن</td></tr>`;
+                document.getElementById('avg-rating').innerText = '0.0 / 5';
+                document.getElementById('satisfaction-rate').innerText = '0%_';
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مطابقة للبحث</td></tr>`;
                 return;
             }
 
             let sum = 0;
+            let positiveCount = 0;
             let rowsHtml = '';
 
             evaluations.forEach(item => {
-                sum += (item.rating || 0);
-                
-                let emoji = '😐';
-                if (item.rating == 5) emoji = '😁 ممتاز';
-                else if (item.rating == 4) emoji = '🙂 جيد';
-                else if (item.rating == 3) emoji = '😐 متوسط';
-                else if (item.rating == 2) emoji = '🙁 سيء';
-                else if (item.rating == 1) emoji = '😡 سيء جداً';
+                const rating = item.rating || 0;
+                sum += rating;
+                if (rating >= 4) positiveCount++;
+
+                let emoji = '😐 متوسط';
+                if (rating == 5) emoji = '😁 ممتاز';
+                else if (rating == 4) emoji = '🙂 جيد';
+                else if (rating == 3) emoji = '😐 متوسط';
+                else if (rating == 2) emoji = '🙁 سيء';
+                else if (rating == 1) emoji = '😡 سيء جداً';
 
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : '-';
 
                 rowsHtml += `
                     <tr>
-                        <td>${emoji}</td>
-                        <td>${item.customer_name || 'زائر كريم'}</td>
-                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || '-'}</td>
-                        <td>${item.comment || '-'}</td>
-                        <td>${item.emp_id || '-'} ${item.store_id ? '(' + item.store_id + ')' : ''}</td>
+                        <td><strong>${emoji}</strong></td>
+                        <td>${item.customer_name || 'غير مسجل'}</td>
+                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || 'غير مسجل'}</td>
+                        <td>${item.comment || 'بدون تعليق'}</td>
+                        <td><span class="badge">معرف: ${item.emp_id || 'سارة أحمد'}</span></td>
                         <td>${dateStr}</td>
                     </tr>
                 `;
             });
 
             const avg = (sum / totalCount).toFixed(1);
-            document.getElementById('avg-rating').innerText = avg;
+            const satisfaction = Math.round((positiveCount / totalCount) * 100);
+
+            document.getElementById('avg-rating').innerText = `${avg} / 5`;
+            document.getElementById('satisfaction-rate').innerText = `${satisfaction}%`;
             document.getElementById('evaluations-list').innerHTML = rowsHtml;
+        }
+
+        function filterData() {
+            const selectedRating = document.getElementById('rating-filter').value;
+            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+
+            const filtered = allEvaluations.filter(item => {
+                const matchesRating = selectedRating === "" || String(item.rating) === selectedRating;
+                
+                const name = (item.customer_name || '').toLowerCase();
+                const mobile = (item.customer_mobile || '').toLowerCase();
+                const comment = (item.comment || '').toLowerCase();
+
+                const matchesSearch = searchQuery === "" || 
+                    name.includes(searchQuery) || 
+                    mobile.includes(searchQuery) || 
+                    comment.includes(searchQuery);
+
+                return matchesRating && matchesSearch;
+            });
+
+            renderData(filtered);
         }
 
         fetchEvaluations();
