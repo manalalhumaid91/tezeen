@@ -266,7 +266,7 @@
             margin-bottom: 8px;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px 16px;
             border-radius: 12px;
@@ -500,8 +500,8 @@
                     <input type="text" id="emp-store" placeholder="مثال: الفرع الرئيسي">
                 </div>
                 <div class="form-group">
-                    <label for="emp-photo">رابط الصورة الشخصية (URL)</label>
-                    <input type="text" id="emp-photo" placeholder="ضع رابط صورة الموظف هنا...">
+                    <label for="emp-photo-file">صورة الموظف (JPG / PNG من الجهاز)</label>
+                    <input type="file" id="emp-photo-file" accept="image/png, image/jpeg" style="padding: 10px; background: #fafafa;">
                 </div>
             </div>
 
@@ -579,7 +579,7 @@
         </div>
     </div>
 
-    <!-- نافذة إعدادات اسم المتجر وشعار الشركة -->
+    <!-- نافذة إعدادات المتجر ورفع الشعار من الجهاز -->
     <div class="settings-modal" id="settingsModal">
         <div class="settings-content">
             <h3>إعدادات اسم المتجر والشعار</h3>
@@ -588,8 +588,8 @@
                 <input type="text" id="settings-store-name" placeholder="أدخل اسم المتجر...">
             </div>
             <div class="form-group" style="margin-bottom: 20px;">
-                <label for="settings-logo-url">رابط شعار الشركة (URL)</label>
-                <input type="text" id="settings-logo-url" placeholder="ضع رابط صورة الشعار هنا...">
+                <label for="settings-logo-file">اختر شعار الشركة (JPG / PNG من الجهاز)</label>
+                <input type="file" id="settings-logo-file" accept="image/png, image/jpeg" style="padding: 10px; background: #fafafa;">
             </div>
             <button class="action-btn" onclick="saveClientSettings()">حفظ التغييرات</button>
             <button class="settings-btn" style="width: 100%; margin-top: 10px; background: #e2e8f0; color: #334155;" onclick="closeSettingsModal()">إغلاق</button>
@@ -629,7 +629,7 @@
 
         function openSettingsModal() {
             document.getElementById('settings-store-name').value = currentClient.name;
-            document.getElementById('settings-logo-url').value = currentClient.logo;
+            document.getElementById('settings-logo-file').value = "";
             document.getElementById('settingsModal').style.display = 'flex';
         }
 
@@ -639,7 +639,7 @@
 
         function saveClientSettings() {
             const newName = document.getElementById('settings-store-name').value.trim();
-            const newLogo = document.getElementById('settings-logo-url').value.trim();
+            const fileInput = document.getElementById('settings-logo-file');
 
             if (!newName) {
                 alert('الرجاء إدخال اسم المتجر!');
@@ -647,13 +647,21 @@
             }
 
             currentClient.name = newName;
-            currentClient.logo = newLogo;
-
             localStorage.setItem('client_name', newName);
-            localStorage.setItem('client_logo', newLogo);
 
-            initClientBranding();
-            closeSettingsModal();
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentClient.logo = e.target.result;
+                    localStorage.setItem('client_logo', e.target.result);
+                    initClientBranding();
+                    closeSettingsModal();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                initClientBranding();
+                closeSettingsModal();
+            }
         }
 
         function logoutClient() {
@@ -775,7 +783,7 @@
             const name = document.getElementById('emp-name').value.trim();
             const title = document.getElementById('emp-title').value.trim();
             const store = document.getElementById('emp-store').value.trim();
-            const photo = document.getElementById('emp-photo').value.trim();
+            const photoFileInput = document.getElementById('emp-photo-file');
 
             if (!name || !store) {
                 alert('الرجاء إدخال اسم الموظف والفرع على الأقل!');
@@ -786,27 +794,41 @@
             document.getElementById('card-title').innerText = title || 'أخصائي خدمة عملاء';
             document.getElementById('card-store').innerText = store;
             document.getElementById('card-company-name').innerText = currentClient.name;
-            
-            if (photo) {
-                document.getElementById('card-avatar').src = photo;
+
+            const processBadgeCreation = (photoUrl) => {
+                if (photoUrl) {
+                    document.getElementById('card-avatar').src = photoUrl;
+                } else {
+                    document.getElementById('card-avatar').src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+                }
+
+                const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
+
+                const qrContainer = document.getElementById('card-qrcode');
+                qrContainer.innerHTML = "";
+
+                try {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(targetUrl);
+                    qr.make();
+                    qrContainer.innerHTML = qr.createImgTag(4, 6);
+                } catch (e) {
+                    qrContainer.innerHTML = "خطأ في الـ QR";
+                }
+
+                document.getElementById('badgePreviewArea').style.display = 'block';
+            };
+
+            if (photoFileInput.files && photoFileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processBadgeCreation(e.target.result);
+                };
+                reader.readAsDataURL(photoFileInput.files[0]);
+            } else {
+                processBadgeCreation(null);
             }
-
-            const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-            const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
-
-            const qrContainer = document.getElementById('card-qrcode');
-            qrContainer.innerHTML = "";
-
-            try {
-                var qr = qrcode(0, 'M');
-                qr.addData(targetUrl);
-                qr.make();
-                qrContainer.innerHTML = qr.createImgTag(4, 6);
-            } catch (e) {
-                qrContainer.innerHTML = "خطأ في الـ QR";
-            }
-
-            document.getElementById('badgePreviewArea').style.display = 'block';
         }
 
         initClientBranding();
