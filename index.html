@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقييم الخدمة - منصة تزين</title>
+    <title>تزين الخدمة - تقييم الأداء</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -48,7 +48,7 @@
             font-size: 13px;
             color: var(--primary-color);
             background: var(--primary-light);
-            padding: 5px 12px;
+            padding: 6px 16px;
             border-radius: 20px;
             display: inline-block;
             font-weight: 700;
@@ -56,8 +56,8 @@
         }
 
         .employee-avatar {
-            width: 90px;
-            height: 90px;
+            width: 95px;
+            height: 95px;
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid var(--primary-light);
@@ -67,9 +67,9 @@
         }
 
         h2 {
-            font-size: 20px;
+            font-size: 21px;
             color: var(--primary-color);
-            margin: 0 0 5px 0;
+            margin: 0 0 6px 0;
             font-weight: 700;
         }
 
@@ -78,6 +78,7 @@
             color: var(--text-muted);
             margin: 0 0 25px 0;
             font-weight: 600;
+            line-height: 1.6;
         }
 
         .rating-container {
@@ -196,11 +197,11 @@
     <div class="card" id="rating-card">
         <div class="store-brand" id="store-brand-name">مركز التجميل</div>
         
-        <!-- صورة الموظف -->
+        <!-- صورة الموظف الحقيقية المرفوعة من الجهاز -->
         <img id="emp-avatar-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-avatar">
         
-        <h2 id="emp-name-title">تقييم الخدمة</h2>
-        <p class="emp-subtitle" id="emp-store-title">نحن ندرك أهمية رأيك لتحسين خدماتنا</p>
+        <h2 id="emp-name-title">تزين الخدمة</h2>
+        <p class="emp-subtitle" id="emp-store-title">نرجو تقييم خدمتنا في الفرع</p>
 
         <form id="evaluation-form" onsubmit="submitEvaluation(event)">
             <div class="rating-container">
@@ -248,21 +249,21 @@
         const storeName = urlParams.get('store') || 'الفرع الرئيسي';
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
-        const empPhoto = urlParams.get('photo') || ''; // استقبال صورة الموظف إن وجدت في الرابط
+        const companyName = urlParams.get('company') || 'اسم الشركة';
+        const empPhoto = urlParams.get('photo') || '';
 
-        // تعبئة البيانات في الواجهة
-        document.getElementById('store-brand-name').innerText = storeName;
-        document.getElementById('emp-name-title').innerText = empName;
-        document.getElementById('emp-store-title').innerText = `الموظف: ${empName} - الفرع: ${storeName}`;
+        // تعبئة البيانات بدقة في صفحة التقييم
+        document.getElementById('store-brand-name').innerText = companyName;
+        document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
+        document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        if (empPhoto) {
+        if (empPhoto && empPhoto !== 'null' && empPhoto !== '') {
             document.getElementById('emp-avatar-img').src = decodeURIComponent(empPhoto);
         }
 
         let selectedRatingValue = 5;
         let selectedRatingText = '😁 ممتاز';
 
-        // تحديد التقييم الافتراضي عند الفتح
         window.addEventListener('DOMContentLoaded', () => {
             const defaultBtn = document.querySelector('.rating-btn');
             if(defaultBtn) defaultBtn.classList.add('selected');
@@ -309,11 +310,9 @@
                 document.getElementById('rating-card').style.display = 'none';
                 document.getElementById('thank-you-card').style.display = 'block';
 
-            } href => {
-                // fallback
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء إرسال التقييم، يجدر المحاولة لاحقاً.');
+                alert('حدث خطأ أثناء إرسال التقييم، يرجى المحاولة لاحقاً.');
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'إرسال التقييم';
             }
