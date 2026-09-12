@@ -323,33 +323,59 @@
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
         const companyName = urlParams.get('company') || 'اسم المركز';
-        const urlPhoto = urlParams.get('photo'); // فحص الصورة الممررة مباشرة عبر الرابط
+        const urlPhoto = urlParams.get('photo'); // فحص الصورة إذا تم تمريرها عبر الرابط
 
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // آلية استرجاع الصورة: 1. عبر رابط URL المباشر، 2. عبر الذاكرة المحلية
-        let savedPhoto = urlPhoto ? decodeURIComponent(urlPhoto) : null;
+        // نظام بحث شامل وعميق لجلب الصورة المرفوعة من الجهاز وتجاوز أي مشاكل تخزين محلي
+        function loadEmployeePhoto() {
+            // 1. الفحص المباشر عبر رابط URL
+            if (urlPhoto) {
+                try {
+                    return decodeURIComponent(urlPhoto);
+                } catch(e) {}
+            }
 
-        if (!savedPhoto) {
-            const photoKey1 = `emp_photo_${empName}_${storeName}`;
-            const photoKey2 = `emp_photo_${empName}`;
-            savedPhoto = localStorage.getItem(photoKey1) || localStorage.getItem(photoKey2);
+            // 2. البحث الدقيق بالمفتاح المطابق لاسم الموظف والفرع
+            const cleanEmp = empName.trim();
+            const cleanStore = storeName.trim();
             
-            if (!savedPhoto) {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.includes(empName) && key.startsWith('emp_photo_')) {
-                        savedPhoto = localStorage.getItem(key);
-                        break;
+            const exactKey1 = `emp_photo_${cleanEmp}_${cleanStore}`;
+            const exactKey2 = `emp_photo_${cleanEmp}`;
+            
+            let photo = localStorage.getItem(exactKey1) || localStorage.getItem(exactKey2);
+            if (photo) return photo;
+
+            // 3. مسح شامل لكل مفاتيح الذاكرة المحلية بحثاً عن أي صورة تخص هذا الموظف
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.includes(cleanEmp) || key.includes('photo') || key.includes('emp'))) {
+                    const val = localStorage.getItem(key);
+                    if (val && (val.startsWith('data:image') || val.startsWith('http'))) {
+                        return val;
                     }
                 }
             }
+
+            // 4. أحدث صورة مرفوعة تم تخزينها بغض النظر عن الاسم كاحتياطي أخير
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('emp_photo_')) {
+                    const val = localStorage.getItem(key);
+                    if (val && val.startsWith('data:image')) {
+                        return val;
+                    }
+                }
+            }
+
+            return null;
         }
 
-        if (savedPhoto) {
-            document.getElementById('emp-avatar-img').src = savedPhoto;
+        const finalPhoto = loadEmployeePhoto();
+        if (finalPhoto) {
+            document.getElementById('emp-avatar-img').src = finalPhoto;
         }
 
         let selectedRatingValue = 5;
