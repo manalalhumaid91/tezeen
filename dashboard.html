@@ -32,7 +32,6 @@
             margin: 0 auto;
         }
 
-        /* ترويسة الموقع */
         .main-header {
             background: var(--bg-card);
             padding: 25px 35px;
@@ -103,7 +102,6 @@
             background: #fecaca;
         }
 
-        /* الأقسام والبطاقات */
         .dashboard-section {
             background: var(--bg-card);
             padding: 30px;
@@ -270,7 +268,6 @@
             background: #1e40af;
         }
 
-        /* تصميم البطاقة المستطيلة الخاصة بالعميل المشترك */
         .badge-preview-area {
             margin-top: 25px;
             padding-top: 20px;
@@ -394,7 +391,6 @@
 <body>
 
     <div class="container">
-        <!-- ترويسة العميل المشترك -->
         <header class="main-header">
             <div class="brand-container">
                 <div class="brand-logo-badge" id="client-logo-container">
@@ -408,7 +404,6 @@
             <button class="logout-btn" onclick="logoutClient()">تسجيل الخروج</button>
         </header>
 
-        <!-- القسم الأول: تسجيل موظف وتوليد البطاقة المستطيلة -->
         <div class="dashboard-section">
             <h2 class="section-title">🪪 تسجيل موظف جديد وتوليد بطاقة QR الفورية</h2>
             
@@ -433,7 +428,6 @@
 
             <button class="action-btn" onclick="generateEmployeeBadge()">إنشاء البطاقة وعرضها للطباعة</button>
 
-            <!-- معاينة البطاقة المستطيلة التي تحمل اسم وشعار العميل -->
             <div class="badge-preview-area" id="badgePreviewArea">
                 <div class="employee-badge-card">
                     <div class="badge-info">
@@ -454,7 +448,6 @@
             </div>
         </div>
 
-        <!-- القسم الثاني: سجل التقييمات والإحصائيات -->
         <div class="dashboard-section">
             <h2 class="section-title">📊 سجل التقييمات والإحصائيات العامة</h2>
 
@@ -513,22 +506,18 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allEvaluations = [];
-        
-        // جلب بيانات العميل المشترك المسجل حالياً من الجلسة
         let currentClient = {
             name: localStorage.getItem('client_name') || 'مركز التجميل',
             logo: localStorage.getItem('client_logo') || '',
             email: localStorage.getItem('client_email') || ''
         };
 
-        // حماية الصفحة: إذا لم يكن هناك عميل مسجل، يتم توجيهه لصفحة الدخول
         if (!currentClient.email) {
             window.location.href = 'login.html';
         }
 
         function initClientBranding() {
             document.getElementById('client-company-name').innerText = currentClient.name;
-            
             const logoContainer = document.getElementById('client-logo-container');
             if (currentClient.logo) {
                 logoContainer.innerHTML = `<img src="${currentClient.logo}" alt="شعار العميل">`;
@@ -538,9 +527,7 @@
         }
 
         function logoutClient() {
-            localStorage.removeItem('client_name');
-            localStorage.removeItem('client_logo');
-            localStorage.removeItem('client_email');
+            localStorage.clear();
             window.location.href = 'login.html';
         }
 
@@ -558,7 +545,6 @@
 
         async function fetchEvaluations() {
             try {
-                // جلب التقييمات الخاصة بالشركة المشتركة الحالية حصرياً بناءً على البريد الإلكتروني
                 const { data, error } = await supabaseClient
                     .from('evaluations')
                     .select('*')
@@ -655,7 +641,6 @@
             renderData(filtered);
         }
 
-        // توليد البطاقة مع تمرير بريد الشركة المشتركة في رابط الـ QR
         function generateEmployeeBadge() {
             const name = document.getElementById('emp-name').value.trim();
             const title = document.getElementById('emp-title').value.trim();
@@ -676,8 +661,10 @@
                 document.getElementById('card-avatar').src = photo;
             }
 
-            const baseUrl = window.location.href.replace('dashboard.html', '').replace(/\/[^\/]*$/, '/');
-            const targetUrl = `${baseUrl}rate.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
+            // توليد الرابط ليطابق index.html بشكل دقيق
+            const currentPath = window.location.href.split('?')[0];
+            const baseUrl = currentPath.replace('dashboard.html', '');
+            const targetUrl = `${baseUrl}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}`;
 
             const qrContainer = document.getElementById('card-qrcode');
             qrContainer.innerHTML = "";
