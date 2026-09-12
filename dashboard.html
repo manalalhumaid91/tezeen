@@ -31,6 +31,50 @@
             margin: 0 auto;
         }
 
+        /* الترويسة والشعار */
+        .main-header {
+            background: var(--bg-card);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.02);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .brand-title h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin: 0 0 4px 0;
+        }
+
+        .brand-title p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
         /* شبكة الإحصائيات الثلاثة حسب التصميم المعتمد تماماً */
         .stats-grid {
             display: grid;
@@ -185,6 +229,17 @@
 <body>
 
     <div class="container">
+        <!-- ترويسة الموقع وشعار تزين -->
+        <header class="main-header">
+            <div class="brand-logo">
+                <div class="brand-icon">تـ</div>
+                <div class="brand-title">
+                    <h1>تزين (Tazeen)</h1>
+                    <p>لوحة تحكم وتقييمات العملاء</p>
+                </div>
+            </div>
+        </header>
+
         <!-- الإحصائيات الثلاثة حسب الصورة المعتمدة -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -201,7 +256,7 @@
             </div>
         </div>
 
-        <!-- شريط الفلترة (جميع الفروع بجانب محرك البحث + التقييمات) -->
+        <!-- شريط الفلترة والبحث (قائمة الفروع بجانب محرك البحث مباشرة) -->
         <div class="filter-section">
             <select id="store-filter" onchange="filterData()">
                 <option value="">جميع الفروع</option>
@@ -343,7 +398,7 @@
                 // مطابقة الفرع
                 const matchesStore = selectedStore === "" || (item.store_id && item.store_id.toLowerCase().includes(selectedStore));
                 
-                // مطابقة التقييم (النجوم)
+                // مطابقة التقييم
                 const matchesRating = selectedRating === "" || itemRating === Number(selectedRating);
                 
                 // مطابقة حقول البحث النصي
