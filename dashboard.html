@@ -31,7 +31,7 @@
             margin: 0 auto;
         }
 
-        .brand-header {
+        .header {
             background: var(--bg-card);
             padding: 22px 25px;
             border-radius: 20px;
@@ -45,7 +45,27 @@
             gap: 15px;
         }
 
-        .brand-header h1 {
+        .brand-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+        }
+
+        .header h1 {
             font-size: 20px;
             color: var(--primary-color);
             margin: 0;
@@ -174,25 +194,17 @@
             color: var(--text-muted);
             font-size: 14px;
         }
-
-        .badge-store {
-            display: inline-block;
-            background: var(--primary-light);
-            color: var(--primary-color);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            margin-top: 3px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <!-- ترويسة الشعار والفرع -->
-        <div class="brand-header">
-            <h1>لوحة تحكم تزين للتقييمات</h1>
+        <div class="header">
+            <div class="brand-logo-area">
+                <div class="brand-icon">ت</div>
+                <h1>لوحة تحكم تزين للتقييمات</h1>
+            </div>
             <div id="filter-info" style="font-size: 13px; color: var(--text-muted); font-weight: 600;">جاري التحميل...</div>
         </div>
 
@@ -225,7 +237,7 @@
         <div class="evaluations-section">
             <div class="section-header">
                 <h2>سجل التقييمات الواردة</h2>
-                <button class="refresh-btn" onclick="fetchEvaluations()">تحديث</button>
+                <button class="refresh-btn" onclick="fetchEvaluations()">تحديث البيانات</button>
             </div>
             <div style="overflow-x: auto;">
                 <table class="eval-table">
@@ -235,7 +247,7 @@
                             <th>اسم العميل</th>
                             <th>رقم الجوال</th>
                             <th>التعليق</th>
-                            <th>الموظف والفرع</th>
+                            <th>الموظف/الفرع</th>
                             <th>الوقت</th>
                         </tr>
                     </thead>
@@ -268,15 +280,20 @@
 
                 if (storeId) {
                     query = query.eq('store_id', storeId);
-                    document.getElementById('filter-info').innerText = `فرع: ${storeId}`;
+                    document.getElementById('filter-info').innerText = `عرض تقييمات الفرع: ${storeId}`;
                 } else {
-                    document.getElementById('filter-info').innerText = `جميع الفروع`;
+                    document.getElementById('filter-info').innerText = `عرض جميع الفروع`;
                 }
 
                 const { data, error } = await query;
                 if (error) throw error;
 
                 allEvaluations = data || [];
+                
+                // إعادة تعيين الفلاتر عند التحديث اليدوي
+                document.getElementById('rating-filter').value = "";
+                document.getElementById('search-input').value = "";
+
                 renderData(allEvaluations);
 
             } catch (err) {
@@ -291,7 +308,7 @@
 
             if (totalCount === 0) {
                 document.getElementById('avg-rating').innerText = '0.0';
-                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مطابقة للبحث أو الفلتر</td></tr>`;
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد بيانات مطابقة</td></tr>`;
                 return;
             }
 
@@ -299,7 +316,7 @@
             let rowsHtml = '';
 
             evaluations.forEach(item => {
-                const rating = item.rating || 0;
+                const rating = Number(item.rating) || 0;
                 sum += rating;
 
                 let emoji = '😐 متوسط';
@@ -310,7 +327,7 @@
                 else if (rating == 1) emoji = '😡 سيء جداً';
 
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : '-';
-                const storeBadge = item.store_id ? `<span class="badge-store">فرع: ${item.store_id}</span>` : `<span class="badge-store" style="background:#f1f5f9; color:#64748b;">فرع عام</span>`;
+                const storeText = item.store_id ? `(${item.store_id})` : '';
                 const empName = item.emp_id || 'سارة أحمد';
 
                 rowsHtml += `
@@ -319,10 +336,7 @@
                         <td>${item.customer_name || 'غير مسجل'}</td>
                         <td dir="ltr" style="text-align: right;">${item.customer_mobile || '-'}</td>
                         <td>${item.comment || '-'}</td>
-                        <td>
-                            <div>${empName}</div>
-                            ${storeBadge}
-                        </td>
+                        <td>${empName} ${storeText}</td>
                         <td>${dateStr}</td>
                     </tr>
                 `;
@@ -338,18 +352,21 @@
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
 
             const filtered = allEvaluations.filter(item => {
-                const matchesRating = selectedRating === "" || String(item.rating) === selectedRating;
+                const itemRating = Number(item.rating);
+                const matchesRating = selectedRating === "" || itemRating === Number(selectedRating);
                 
                 const name = (item.customer_name || '').toLowerCase();
                 const mobile = (item.customer_mobile || '').toLowerCase();
                 const comment = (item.comment || '').toLowerCase();
                 const store = (item.store_id || '').toLowerCase();
+                const emp = (item.emp_id || '').toLowerCase();
 
                 const matchesSearch = searchQuery === "" || 
                     name.includes(searchQuery) || 
                     mobile.includes(searchQuery) || 
                     comment.includes(searchQuery) ||
-                    store.includes(searchQuery);
+                    store.includes(searchQuery) ||
+                    emp.includes(searchQuery);
 
                 return matchesRating && matchesSearch;
             });
