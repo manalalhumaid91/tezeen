@@ -323,23 +323,27 @@
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
         const companyName = urlParams.get('company') || 'اسم المركز';
+        const urlPhoto = urlParams.get('photo'); // فحص الصورة الممررة مباشرة عبر الرابط
 
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // جلب الصورة من الذاكرة المحلية بأكثر من صيغة لضمان مطابقتها تماماً لما تحفظه لوحة التحكم
-        const photoKey1 = `emp_photo_${empName}_${storeName}`;
-        const photoKey2 = `emp_photo_${empName}`;
-        let savedPhoto = localStorage.getItem(photoKey1) || localStorage.getItem(photoKey2);
-        
-        // إذا لم توجد، البحث في مفاتيح الذاكرة المحلية عن أي صورة مطابقة لاسم الموظفة
+        // آلية استرجاع الصورة: 1. عبر رابط URL المباشر، 2. عبر الذاكرة المحلية
+        let savedPhoto = urlPhoto ? decodeURIComponent(urlPhoto) : null;
+
         if (!savedPhoto) {
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.includes(empName) && key.startsWith('emp_photo_')) {
-                    savedPhoto = localStorage.getItem(key);
-                    break;
+            const photoKey1 = `emp_photo_${empName}_${storeName}`;
+            const photoKey2 = `emp_photo_${empName}`;
+            savedPhoto = localStorage.getItem(photoKey1) || localStorage.getItem(photoKey2);
+            
+            if (!savedPhoto) {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes(empName) && key.startsWith('emp_photo_')) {
+                        savedPhoto = localStorage.getItem(key);
+                        break;
+                    }
                 }
             }
         }
