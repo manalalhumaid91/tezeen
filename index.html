@@ -323,49 +323,45 @@
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
         const companyName = urlParams.get('company') || 'اسم المركز';
-        const urlPhoto = urlParams.get('photo'); // رابط الصورة القادم من الـ QR أو تخزين Supabase
+        const urlPhoto = urlParams.get('photo');
+        const urlLogo = urlParams.get('logo');
 
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // دالة جلب صورة الموظف (تدعم Supabase Storage والروابط والذاكرة المحلية)
-        function loadEmployeePhoto() {
-            // 1. الفحص المباشر عبر رابط URL (الذي يأتي من تكسير الرابط أو الـ QR)
+        // دالة آمنة ومستقرة لجلب صورة الموظف وشعار المركز من الـ URL أو التخزين المحلي
+        function loadMediaAssets() {
+            // 1. معالجة صورة الموظف
             if (urlPhoto) {
                 try {
-                    return decodeURIComponent(urlPhoto);
+                    document.getElementById('emp-avatar-img').src = decodeURIComponent(urlPhoto);
                 } catch(e) {}
-            }
-
-            // 2. البحث الدقيق بالذاكرة المحلية
-            const cleanEmp = empName.trim();
-            const cleanStore = storeName.trim();
-            
-            const exactKey1 = `emp_photo_${cleanEmp}_${cleanStore}`;
-            const exactKey2 = `emp_photo_${cleanEmp}`;
-            
-            let photo = localStorage.getItem(exactKey1) || localStorage.getItem(exactKey2);
-            if (photo) return photo;
-
-            // 3. مسح شامل لكل مفاتيح الذاكرة المحلية بحثاً عن أي صورة تخص هذا الموظف
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && (key.includes(cleanEmp) || key.includes('photo') || key.includes('emp'))) {
-                    const val = localStorage.getItem(key);
-                    if (val && (val.startsWith('data:image') || val.startsWith('http'))) {
-                        return val;
-                    }
+            } else {
+                const cleanEmp = empName.trim();
+                const cleanStore = storeName.trim();
+                const localPhoto = localStorage.getItem(`emp_photo_${cleanEmp}_${cleanStore}`) || localStorage.getItem(`emp_photo_${cleanEmp}`);
+                if (localPhoto) {
+                    document.getElementById('emp-avatar-img').src = localPhoto;
                 }
             }
 
-            return null;
+            // 2. معالجة شعار المركز
+            if (urlLogo) {
+                try {
+                    // إذا كان هناك عنصر مخصص للشعار أو يتم تمريره
+                    const brandSpan = document.getElementById('store-brand-name');
+                    if (brandSpan) {
+                        const decodedLogo = decodeURIComponent(urlLogo);
+                        if (decodedLogo.startsWith('http') || decodedLogo.startsWith('data:image')) {
+                            brandSpan.innerHTML = `<img src="${decodedLogo}" alt="شعار المركز" style="max-height: 25px; vertical-align: middle; border-radius: 4px;">`;
+                        }
+                    }
+                } catch(e) {}
+            }
         }
 
-        const finalPhoto = loadEmployeePhoto();
-        if (finalPhoto) {
-            document.getElementById('emp-avatar-img').src = finalPhoto;
-        }
+        loadMediaAssets();
 
         let selectedRatingValue = 5;
         let selectedRatingText = '😁 ممتاز';
@@ -382,7 +378,9 @@
             document.querySelectorAll('.rating-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            event.currentTarget.classList.add('selected');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('selected');
+            }
         }
 
         async function submitEvaluation(event) {
