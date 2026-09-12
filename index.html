@@ -323,22 +323,22 @@
         const empName = urlParams.get('emp') || 'موظف الخدمة';
         const clientEmail = urlParams.get('client') || '';
         const companyName = urlParams.get('company') || 'اسم المركز';
-        const urlPhoto = urlParams.get('photo'); // فحص الصورة إذا تم تمريرها عبر الرابط
+        const urlPhoto = urlParams.get('photo'); // رابط الصورة القادم من الـ QR أو تخزين Supabase
 
         document.getElementById('store-brand-name').innerText = companyName;
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // نظام بحث شامل وعميق لجلب الصورة المرفوعة من الجهاز وتجاوز أي مشاكل تخزين محلي
+        // دالة جلب صورة الموظف (تدعم Supabase Storage والروابط والذاكرة المحلية)
         function loadEmployeePhoto() {
-            // 1. الفحص المباشر عبر رابط URL
+            // 1. الفحص المباشر عبر رابط URL (الذي يأتي من تكسير الرابط أو الـ QR)
             if (urlPhoto) {
                 try {
                     return decodeURIComponent(urlPhoto);
                 } catch(e) {}
             }
 
-            // 2. البحث الدقيق بالمفتاح المطابق لاسم الموظف والفرع
+            // 2. البحث الدقيق بالذاكرة المحلية
             const cleanEmp = empName.trim();
             const cleanStore = storeName.trim();
             
@@ -354,17 +354,6 @@
                 if (key && (key.includes(cleanEmp) || key.includes('photo') || key.includes('emp'))) {
                     const val = localStorage.getItem(key);
                     if (val && (val.startsWith('data:image') || val.startsWith('http'))) {
-                        return val;
-                    }
-                }
-            }
-
-            // 4. أحدث صورة مرفوعة تم تخزينها بغض النظر عن الاسم كاحتياطي أخير
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('emp_photo_')) {
-                    const val = localStorage.getItem(key);
-                    if (val && val.startsWith('data:image')) {
                         return val;
                     }
                 }
