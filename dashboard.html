@@ -3,270 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تزين - لوحة تحكم التقييمات</title>
-    <!-- تحميل مكتبة Supabase -->
+    <title>تزين - لوحة التحكم والتقييمات</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 30px;
-            color: #1e293b;
+        :root {
+            --primary-color: #1e3a8a;
+            --primary-light: #f0f6ff;
+            --border-color: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
         }
 
-        .dashboard-container {
-            max-width: 1100px;
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .header {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            background: #ffffff;
-            padding: 20px 30px;
-            border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            border: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .header h1 {
             font-size: 22px;
+            color: var(--primary-color);
             margin: 0;
-            color: #1e3a8a;
-        }
-
-        .header p {
-            font-size: 13px;
-            color: #64748b;
-            margin: 4px 0 0 0;
-        }
-
-        .brand-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            background: #f0f6ff;
-            padding: 8px 16px;
-            border-radius: 12px;
-            border: 1px solid #dbeafe;
-        }
-
-        .brand-badge .ar-name {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1e3a8a;
-        }
-
-        .brand-badge .en-name {
-            font-size: 10px;
-            font-weight: 700;
-            color: #3b82f6;
-            letter-spacing: 1.5px;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .stat-card {
-            background: #ffffff;
-            padding: 20px 24px;
-            border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            border: 1px solid #f1f5f9;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(30, 58, 138, 0.02);
         }
 
         .stat-card h3 {
             font-size: 13px;
-            color: #64748b;
+            color: var(--text-muted);
             margin: 0 0 8px 0;
         }
 
         .stat-card .number {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
-            color: #1e3a8a;
+            color: var(--primary-color);
             margin: 0;
         }
 
-        .controls-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .controls-bar input, .controls-bar select {
-            padding: 10px 16px;
-            border-radius: 12px;
-            border: 1px solid #cbd5e1;
-            font-family: 'Cairo', sans-serif;
-            font-size: 13px;
-            outline: none;
-            background: #ffffff;
-            color: #1e293b;
-            transition: border-color 0.2s;
-        }
-
-        .controls-bar input {
-            flex: 1;
-            min-width: 220px;
-        }
-
-        .controls-bar input:focus, .controls-bar select:focus {
-            border-color: #1e3a8a;
-        }
-
-        .table-container {
-            background: #ffffff;
+        .evaluations-section {
+            background: var(--bg-card);
+            padding: 25px;
             border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            border: 1px solid #f1f5f9;
-            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.03);
         }
 
-        .table-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .evaluations-section h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
         }
 
-        .table-header h2 {
-            font-size: 16px;
-            margin: 0;
-            color: #1e293b;
-        }
-
-        table {
+        .eval-table {
             width: 100%;
             border-collapse: collapse;
             text-align: right;
         }
 
-        th, td {
-            padding: 16px 24px;
+        .eval-table th, .eval-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
             font-size: 13px;
         }
 
-        th {
-            background-color: #f8fafc;
-            color: #475569;
+        .eval-table th {
+            color: var(--text-muted);
             font-weight: 600;
-            border-bottom: 1px solid #f1f5f9;
+            background: var(--primary-light);
         }
 
-        td {
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
+        .eval-table tr:hover {
+            background: #fafafa;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .rating-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .rating-5, .rating-4 { background: #ecfdf5; color: #059669; }
-        .rating-3 { background: #fffbeb; color: #d97706; }
-        .rating-2, .rating-1 { background: #fef2f2; color: #dc2626; }
-
-        .loading, .no-data {
+        .no-data {
             text-align: center;
             padding: 40px;
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 14px;
-        }
-
-        .refresh-btn {
-            background: #1e3a8a;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-family: 'Cairo', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .refresh-btn:hover {
-            background: #1e40af;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        
+    <div class="container">
         <div class="header">
-            <div>
-                <h1>لوحة تحكم التقييمات</h1>
-                <p>متابعة تقييمات العملاء وأداء الموظفين لحظة بلحظة</p>
-            </div>
-            <div class="brand-badge">
-                <span class="ar-name">تزين</span>
-                <span class="en-name">TAZAYYUN</span>
-            </div>
+            <h1>لوحة تحكم تزين للتقييمات</h1>
+            <div id="filter-info" style="font-size: 13px; color: var(--text-muted);">جاري تحميل البيانات...</div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>إجمالي التقييمات</h3>
-                <p class="number" id="total-count">-</p>
+                <p class="number" id="total-count">0</p>
             </div>
             <div class="stat-card">
                 <h3>متوسط التقييم العام</h3>
-                <p class="number" id="avg-rating">-</p>
-            </div>
-            <div class="stat-card">
-                <h3>الرضا العام</h3>
-                <p class="number" id="satisfaction-rate">-</p>
+                <p class="number" id="avg-rating">0.0</p>
             </div>
         </div>
 
-        <!-- أشرطة البحث والفلترة -->
-        <div class="controls-bar">
-            <input type="text" id="search-input" placeholder="🔍 ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterData()">
-            <select id="rating-filter" onchange="filterData()">
-                <option value="">⭐ جميع التقييمات</option>
-                <option value="5">😁 ممتاز (5)</option>
-                <option value="4">🙂 جيد (4)</option>
-                <option value="3">😐 متوسط (3)</option>
-                <option value="2">🙁 سيء (2)</option>
-                <option value="1">😡 سيء جداً (1)</option>
-            </select>
-        </div>
-
-        <div class="table-container">
-            <div class="table-header">
-                <h2>سجل التقييمات الواردة</h2>
-                <button class="refresh-btn" onclick="fetchEvaluations()">تحديث البيانات</button>
+        <div class="evaluations-section">
+            <h2>سجل التقييمات الأخيرة</h2>
+            <div style="overflow-x: auto;">
+                <table class="eval-table">
+                    <thead>
+                        <tr>
+                            <th>التقييم</th>
+                            <th>اسم العميل</th>
+                            <th>رقم الجوال</th>
+                            <th>التعليق</th>
+                            <th>الموظف/الفرع</th>
+                            <th>الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="evaluations-list">
+                        <tr>
+                            <td colspan="6" class="no-data">جاري جلب التقييمات...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            
-            <div id="table-content">
-                <div class="loading">جاري تحميل البيانات...</div>
-            </div>
         </div>
-
     </div>
 
     <script>
@@ -274,128 +173,75 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let globalEvaluations = [];
-
-        const emojiMap = {
-            1: { emoji: '😡', text: 'سيء جداً' },
-            2: { emoji: '🙁', text: 'سيء' },
-            3: { emoji: '😐', text: 'متوسط' },
-            4: { emoji: '🙂', text: 'جيد' },
-            5: { emoji: '😁', text: 'ممتاز' }
-        };
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeId = urlParams.get('store');
 
         async function fetchEvaluations() {
-            const container = document.getElementById('table-content');
-            container.innerHTML = '<div class="loading">جاري تحديث البيانات...</div>';
-
             try {
-                const { data, error } = await supabaseClient
+                let query = supabaseClient
                     .from('evaluations')
-                    .select('*');
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (storeId) {
+                    query = query.eq('store_id', storeId);
+                    document.getElementById('filter-info').innerText = `عرض تقييمات الفرع: ${storeId}`;
+                } else {
+                    document.getElementById('filter-info').innerText = `عرض جميع الفروع`;
+                }
+
+                const { data, error } = await query;
 
                 if (error) throw error;
 
-                globalEvaluations = data || [];
-                updateStats(globalEvaluations);
-                renderTable(globalEvaluations);
+                renderData(data || []);
 
             } catch (err) {
-                console.error('Fetch error:', err);
-                container.innerHTML = `<div class="no-data" style="color: #dc2626;">حدث خطأ أثناء تحميل البيانات: ${err.message}</div>`;
+                console.error(err);
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data" style="color: red;">خطأ في جلب البيانات: ${err.message}</td></tr>`;
             }
         }
 
-        function updateStats(data) {
-            if (!data || data.length === 0) {
-                document.getElementById('total-count').innerText = '0';
-                document.getElementById('avg-rating').innerText = '0.0 / 5';
-                document.getElementById('satisfaction-rate').innerText = '0%';
+        function renderData(evaluations) {
+            const totalCount = evaluations.length;
+            document.getElementById('total-count').innerText = totalCount;
+
+            if (totalCount === 0) {
+                document.getElementById('avg-rating').innerText = '0.0';
+                document.getElementById('evaluations-list').innerHTML = `<tr><td colspan="6" class="no-data">لا توجد تقييمات مسجلة حتى الآن</td></tr>`;
                 return;
             }
 
-            const total = data.length;
             let sum = 0;
-            let positiveCount = 0;
+            let rowsHtml = '';
 
-            data.forEach(item => {
-                const ratingVal = parseFloat(item.rating) || 0;
-                sum += ratingVal;
-                if (ratingVal >= 4) positiveCount++;
-            });
+            evaluations.forEach(item => {
+                sum += (item.rating || 0);
+                
+                let emoji = '😐';
+                if (item.rating == 5) emoji = '😁 ممتاز';
+                else if (item.rating == 4) emoji = '🙂 جيد';
+                else if (item.rating == 3) emoji = '😐 متوسط';
+                else if (item.rating == 2) emoji = '🙁 سيء';
+                else if (item.rating == 1) emoji = '😡 سيء جداً';
 
-            const avg = (sum / total).toFixed(1);
-            const satisfaction = Math.round((positiveCount / total) * 100);
+                const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : '-';
 
-            document.getElementById('total-count').innerText = total;
-            document.getElementById('avg-rating').innerText = avg + ' / 5';
-            document.getElementById('satisfaction-rate').innerText = satisfaction + '%';
-        }
-
-        function filterData() {
-            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
-            const ratingQuery = document.getElementById('rating-filter').value;
-
-            const filtered = globalEvaluations.filter(item => {
-                const name = (item.customer_name || '').toLowerCase();
-                const mobile = (item.customer_mobile || '').toLowerCase();
-                const comment = (item.comment || '').toLowerCase();
-                const ratingStr = String(item.rating || '');
-
-                const matchesSearch = name.includes(searchQuery) || mobile.includes(searchQuery) || comment.includes(searchQuery);
-                const matchesRating = ratingQuery === '' || ratingStr === ratingQuery;
-
-                return matchesSearch && matchesRating;
-            });
-
-            renderTable(filtered);
-        }
-
-        function renderTable(data) {
-            const container = document.getElementById('table-content');
-
-            if (!data || data.length === 0) {
-                container.innerHTML = '<div class="no-data">لا توجد نتائج مطابقة للبحث أو التقييمات.</div>';
-                return;
-            }
-
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>التقييم</th>
-                            <th>اسم العميل</th>
-                            <th>رقم الجوال</th>
-                            <th>التعليق</th>
-                            <th>الموظف</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            data.forEach(item => {
-                const ratingNum = parseInt(item.rating) || 3;
-                const ratingInfo = emojiMap[ratingNum] || { emoji: '⭐', text: item.rating };
-                const clientName = item.customer_name ? item.customer_name : '<span style="color:#94a3b8">غير مسجل</span>';
-                const clientMobile = item.customer_mobile ? item.customer_mobile : '<span style="color:#94a3b8">غير مسجل</span>';
-                const comment = item.comment ? item.comment : '<span style="color:#94a3b8">بدون تعليق</span>';
-
-                html += `
+                rowsHtml += `
                     <tr>
-                        <td>
-                            <span class="rating-badge rating-${ratingNum}">
-                                ${ratingInfo.emoji} ${ratingInfo.text}
-                            </span>
-                        </td>
-                        <td><strong>${clientName}</strong></td>
-                        <td dir="ltr" style="text-align: right;">${clientMobile}</td>
-                        <td>${comment}</td>
-                        <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 11px;">معرف: ${item.emp_id || '-'}</span></td>
+                        <td>${emoji}</td>
+                        <td>${item.customer_name || 'زائر كريم'}</td>
+                        <td dir="ltr" style="text-align: right;">${item.customer_mobile || '-'}</td>
+                        <td>${item.comment || '-'}</td>
+                        <td>${item.emp_id || '-'} ${item.store_id ? '(' + item.store_id + ')' : ''}</td>
+                        <td>${dateStr}</td>
                     </tr>
                 `;
             });
 
-            html += `</tbody></table>`;
-            container.innerHTML = html;
+            const avg = (sum / totalCount).toFixed(1);
+            document.getElementById('avg-rating').innerText = avg;
+            document.getElementById('evaluations-list').innerHTML = rowsHtml;
         }
 
         fetchEvaluations();
