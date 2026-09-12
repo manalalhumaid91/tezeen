@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم المركزية - إدارة الموظفين والتقييمات</title>
+    <title>لوحة التحكم المركزية - منصة تزين</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
@@ -297,6 +297,15 @@
             background: #1e40af;
         }
 
+        .loading-overlay {
+            display: none;
+            font-size: 13px;
+            color: var(--primary-color);
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
         .badge-preview-area {
             margin-top: 25px;
             padding-top: 20px;
@@ -498,12 +507,13 @@
                     <input type="text" id="emp-store" placeholder="مثال: الفرع الرئيسي">
                 </div>
                 <div class="form-group">
-                    <label for="emp-photo-file">صورة الموظف (JPG / PNG من الجهاز)</label>
+                    <label for="emp-photo-file">صورة الموظف الشخصية</label>
                     <input type="file" id="emp-photo-file" accept="image/png, image/jpeg" style="padding: 10px; background: #fafafa;">
                 </div>
             </div>
 
             <button class="action-btn" onclick="generateEmployeeBadge()">إنشاء البطاقة وعرضها للطباعة</button>
+            <div class="loading-overlay" id="loadingBadge">جاري رفع الصورة للسحابة وإنشاء البطاقة...</div>
 
             <div class="badge-preview-area" id="badgePreviewArea">
                 <div class="employee-badge-card">
@@ -585,10 +595,10 @@
                 <input type="text" id="settings-store-name" placeholder="أدخل اسم المتجر...">
             </div>
             <div class="form-group" style="margin-bottom: 20px;">
-                <label for="settings-logo-file">اختر شعار الشركة (JPG / PNG من الجهاز)</label>
+                <label for="settings-logo-file">اختر شعار الشركة الجديد</label>
                 <input type="file" id="settings-logo-file" accept="image/png, image/jpeg" style="padding: 10px; background: #fafafa;">
             </div>
-            <button class="action-btn" onclick="saveClientSettings()">حفظ التغييرات</button>
+            <button class="action-btn" onclick="saveClientSettings()">حفظ الشعار والمتجر</button>
             <button class="settings-btn" style="width: 100%; margin-top: 10px; background: #e2e8f0; color: #334155;" onclick="closeSettingsModal()">إغلاق</button>
         </div>
     </div>
@@ -601,6 +611,7 @@
         const SUPABASE_URL = 'https://tmiqnvzlnnvhjswkkdrk.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const BUCKET_NAME = 'tazeen-storage';
 
         let allEvaluations = [];
         let currentClient = {
@@ -623,6 +634,41 @@
             }
         }
 
+        async function uploadFileToSupabase(file, folderName) {
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${folderName}/${Date.now()}_${Math.random().toString(36.substring(2))}.${fileExt}`;
+                
+                const { data, error } = await supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .upload(fileName, file, { upsert: true });
+
+                if (error) {
+                    // إذا لم يكن المجلد موجوداً، نكتفي برفع الملف مباشرة في الجذر
+                    const { data: rootData, error: rootError } = await supabaseClient.storage
+                        .from(BUCKET_NAME)
+                        .upload(`${Date.now()}_${file.name}`, file, { upsert: true });
+                    
+                    if (rootError) throw rootError;
+                    
+                    const { data: publicUrlData } = supabaseClient.storage
+                        .from(BUCKET_NAME)
+                        .getPublicUrl(`${Date.now()}_${file.name}`);
+                    return publicUrlData.publicUrl;
+                }
+
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .getPublicUrl(data.path);
+                
+                return publicUrlData.publicUrl;
+            } catch (err) {
+                console.error("خطأ في رفع الملف:", err);
+                alert("تعذر رفع الصورة للسحابة، تأكد من إعدادات التخزين في Supabase (Storage Bucket named tazeen-storage).");
+                return null;
+            }
+        }
+
         function openSettingsModal() {
             document.getElementById('settings-store-name').value = currentClient.name;
             document.getElementById('settings-logo-file').value = "";
@@ -633,7 +679,7 @@
             document.getElementById('settingsModal').style.display = 'none';
         }
 
-        function saveClientSettings() {
+        async function saveClientSettings() {
             const newName = document.getElementById('settings-store-name').value.trim();
             const fileInput = document.getElementById('settings-logo-file');
 
@@ -646,18 +692,16 @@
             localStorage.setItem('client_name', newName);
 
             if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentClient.logo = e.target.result;
-                    localStorage.setItem('client_logo', e.target.result);
-                    initClientBranding();
-                    closeSettingsModal();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                initClientBranding();
-                closeSettingsModal();
+                const publicUrl = await uploadFileToSupabase(fileInput.files[0], 'logos');
+                if (publicUrl) {
+                    currentClient.logo = publicUrl;
+                    localStorage.setItem('client_logo', publicUrl);
+                }
             }
+
+            initClientBranding();
+            closeSettingsModal();
+            alert('تم الحفظ بنجاح!');
         }
 
         function logoutClient() {
@@ -775,7 +819,7 @@
             renderData(filtered);
         }
 
-        function generateEmployeeBadge() {
+        async function generateEmployeeBadge() {
             const name = document.getElementById('emp-name').value.trim();
             const title = document.getElementById('emp-title').value.trim();
             const store = document.getElementById('emp-store').value.trim();
@@ -786,47 +830,42 @@
                 return;
             }
 
+            document.getElementById('loadingBadge').style.display = 'block';
+
+            let photoUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+
+            if (photoFileInput.files && photoFileInput.files[0]) {
+                const uploadedUrl = await uploadFileToSupabase(photoFileInput.files[0], 'employees');
+                if (uploadedUrl) {
+                    photoUrl = uploadedUrl;
+                }
+            }
+
+            document.getElementById('loadingBadge').style.display = 'none';
+
             document.getElementById('card-name').innerText = name;
             document.getElementById('card-title').innerText = title || 'أخصائي خدمة عملاء';
             document.getElementById('card-store').innerText = store;
             document.getElementById('card-company-name').innerText = currentClient.name;
+            document.getElementById('card-avatar').src = photoUrl;
 
-            const processBadgeCreation = (photoBase64) => {
-                if (photoBase64) {
-                    document.getElementById('card-avatar').src = photoBase64;
-                    localStorage.setItem(`emp_photo_${name}_${store}`, photoBase64);
-                } else {
-                    document.getElementById('card-avatar').src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
-                }
+            // بناء الرابط المباشر للعميل لفتح صفحة التقييم مع تضمين الصورة وشعار المتجر
+            const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const targetUrl = `${baseDomain}rate.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}&logo=${encodeURIComponent(currentClient.logo)}&photo=${encodeURIComponent(photoUrl)}`;
 
-                const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-                
-                const targetUrl = `${baseDomain}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}`;
+            const qrContainer = document.getElementById('card-qrcode');
+            qrContainer.innerHTML = "";
 
-                const qrContainer = document.getElementById('card-qrcode');
-                qrContainer.innerHTML = "";
-
-                try {
-                    var qr = qrcode(0, 'M');
-                    qr.addData(targetUrl);
-                    qr.make();
-                    qrContainer.innerHTML = qr.createImgTag(4, 6);
-                } catch (e) {
-                    qrContainer.innerHTML = "خطأ في الـ QR";
-                }
-
-                document.getElementById('badgePreviewArea').style.display = 'block';
-            };
-
-            if (photoFileInput.files && photoFileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    processBadgeCreation(e.target.result);
-                };
-                reader.readAsDataURL(photoFileInput.files[0]);
-            } else {
-                processBadgeCreation(null);
+            try {
+                var qr = qrcode(0, 'M');
+                qr.addData(targetUrl);
+                qr.make();
+                qrContainer.innerHTML = qr.createImgTag(4, 6);
+            } catch (e) {
+                qrContainer.innerHTML = "خطأ في الـ QR";
             }
+
+            document.getElementById('badgePreviewArea').style.display = 'block';
         }
 
         initClientBranding();
