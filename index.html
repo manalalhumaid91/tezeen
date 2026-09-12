@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تزين - تقييم الخدمة</title>
+    <title>تقييم الخدمة</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -11,7 +11,6 @@
         :root {
             --primary-color: #1e3a8a;
             --primary-light: #f0f6ff;
-            --primary-hover: #1e40af;
             --border-color: #e2e8f0;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -24,328 +23,143 @@
             background-color: var(--bg-body);
             margin: 0;
             padding: 20px;
-            color: var(--text-main);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             box-sizing: border-box;
         }
 
-        .container {
+        .rating-card {
             background: var(--bg-card);
-            padding: 35px;
-            border-radius: 24px;
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px rgba(30, 58, 138, 0.05);
             width: 100%;
-            max-width: 440px;
-            border: 1px solid var(--border-color);
+            max-width: 450px;
             box-sizing: border-box;
             text-align: center;
         }
 
-        .brand-header {
-            margin-bottom: 25px;
-        }
-
-        .brand-header h1 {
+        .rating-card h2 {
             font-size: 20px;
             color: var(--primary-color);
             margin: 0 0 5px 0;
             font-weight: 700;
         }
 
-        .brand-header p {
+        .rating-card p {
             font-size: 13px;
             color: var(--text-muted);
-            margin: 0;
+            margin: 0 0 20px 0;
         }
 
-        .employee-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .emp-badge-info {
             background: var(--primary-light);
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-            border: 1px solid #dbeafe;
-            text-align: right;
-        }
-
-        .employee-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
-        }
-
-        .employee-info h3 {
-            font-size: 15px;
-            margin: 0 0 4px 0;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
             color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .employee-info p {
-            font-size: 12px;
-            margin: 0 0 2px 0;
-            color: var(--text-main);
-        }
-
-        .employee-info .branch {
-            font-size: 11px;
-            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: right;
         }
 
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-main);
+            color: var(--text-muted);
+            margin-bottom: 6px;
         }
 
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px 16px;
-            border-radius: 14px;
+            padding: 12px;
+            border-radius: 10px;
             border: 1px solid var(--border-color);
             font-family: 'Cairo', sans-serif;
             font-size: 13px;
             outline: none;
+            background: #fafafa;
             box-sizing: border-box;
-            background: #fafafa;
-            color: var(--text-main);
-            transition: all 0.2s ease;
-        }
-
-        .form-group input:focus, .form-group textarea:focus {
-            border-color: var(--primary-color);
-            background: var(--bg-card);
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-
-        .rating-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 25px;
-        }
-
-        .rating-btn {
-            flex: 1;
-            background: #fafafa;
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px 5px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-
-        .rating-btn .emoji {
-            font-size: 22px;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .rating-btn .label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .rating-btn:hover {
-            border-color: var(--primary-color);
-            background: var(--primary-light);
-        }
-
-        .rating-btn.active {
-            background: var(--primary-light);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.15);
-        }
-
-        .rating-btn.active .label {
-            color: var(--primary-color);
         }
 
         .submit-btn {
-            width: 100%;
             background: var(--primary-color);
             color: white;
             border: none;
             padding: 14px;
-            border-radius: 14px;
+            border-radius: 12px;
+            cursor: pointer;
             font-family: 'Cairo', sans-serif;
             font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
             box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
         }
 
         .submit-btn:hover {
-            background: var(--primary-hover);
+            background: #1e40af;
         }
 
-        .submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* تنسيق شاشة النجاح المخصصة */
-        .success-screen {
+        .success-msg {
             display: none;
-            padding: 20px 0;
-        }
-
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: #ecfdf5;
-            color: #10b981;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 20px auto;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
-        }
-
-        .success-screen h2 {
-            font-size: 24px;
-            color: var(--primary-color);
-            margin: 0 0 8px 0;
-        }
-
-        .success-screen p {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin: 0 0 25px 0;
-        }
-
-        .selected-feedback-card {
-            background: #fffbeb;
-            border: 1px solid #fef3c7;
-            padding: 15px;
-            border-radius: 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-
-        .selected-feedback-card span {
-            font-size: 28px;
-        }
-
-        .selected-feedback-card strong {
-            font-size: 14px;
-            color: #d97706;
-        }
-
-        .reset-link {
-            display: block;
-            color: var(--text-muted);
-            font-size: 13px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .reset-link:hover {
-            color: var(--primary-color);
+            color: #059669;
+            font-weight: 700;
+            font-size: 16px;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- نموذج التقييم -->
-        <div id="form-content">
-            <div class="brand-header">
-                <h1>تزين للخدمات</h1>
-                <p>نسعد بتعليقك وتقييمك لتطوير خدمتنا</p>
-            </div>
+    <div class="rating-card">
+        <h2>قيم تجربتك معنا</h2>
+        <p>رأيك يهمنا لتحسين جودة الخدمة</p>
 
-            <div class="employee-card">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="صورة الموظف" class="employee-img">
-                <div class="employee-info">
-                    <h3>سارة أحمد</h3>
-                    <p>أخصائية خدمة عملاء</p>
-                    <span class="branch">فرع التحلية</span>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>كيف تقييم تجربتك اليوم؟</label>
-                <div class="rating-container">
-                    <button type="button" class="rating-btn" onclick="selectRating(1, this, 'سيء جداً', '😡')">
-                        <span class="emoji">😡</span>
-                        <span class="label">سيء جداً</span>
-                    </button>
-                    <button type="button" class="rating-btn" onclick="selectRating(2, this, 'سيء', '🙁')">
-                        <span class="emoji">🙁</span>
-                        <span class="label">سيء</span>
-                    </button>
-                    <button type="button" class="rating-btn" onclick="selectRating(3, this, 'متوسط', '😐')">
-                        <span class="emoji">😐</span>
-                        <span class="label">متوسط</span>
-                    </button>
-                    <button type="button" class="rating-btn" onclick="selectRating(4, this, 'جيد', '🙂')">
-                        <span class="emoji">🙂</span>
-                        <span class="label">جيد</span>
-                    </button>
-                    <button type="button" class="rating-btn active" onclick="selectRating(5, this, 'ممتاز', '😁')">
-                        <span class="emoji">😁</span>
-                        <span class="label">ممتاز</span>
-                    </button>
-                </div>
-                <input type="hidden" id="rating-value" value="5">
-                <input type="hidden" id="rating-label" value="ممتاز">
-                <input type="hidden" id="rating-emoji" value="😁">
-            </div>
-
-            <div class="form-group">
-                <label>اسم العميل (اختياري)</label>
-                <input type="text" id="name-input" placeholder="ادخل اسمك الكريم">
-            </div>
-
-            <div class="form-group">
-                <label>رقم الجوال (اختياري)</label>
-                <input type="text" id="mobile-input" placeholder="05xxxxxxxx" dir="ltr" style="text-align: right;">
-            </div>
-
-            <div class="form-group">
-                <label>تعليقك أو ملاحظاتك</label>
-                <textarea id="comment-input" rows="3" placeholder="أكتب ملاحظاتك هنا..."></textarea>
-            </div>
-
-            <button type="button" class="submit-btn" onclick="submitEvaluation()">إرسال التقييم</button>
+        <div class="emp-badge-info" id="target-info">
+            جاري تحميل بيانات الخدمة...
         </div>
 
-        <!-- واجهة النجاح المخصصة -->
-        <div id="success-content" class="success-screen">
-            <div class="success-icon">✓</div>
-            <h2>شكراً لك</h2>
-            <p>تقييمك وصل.. وبـ رأيك تزين خدمتنا</p>
-            
-            <div class="selected-feedback-card">
-                <span id="success-emoji">😁</span>
-                <strong id="success-label">ممتاز</strong>
+        <form id="ratingForm" onsubmit="submitRating(event)">
+            <div class="form-group">
+                <label for="rating">التقييم العام</label>
+                <select id="rating" required>
+                    <option value="">اختر التقييم...</option>
+                    <option value="ممتاز">😁 ممتاز</option>
+                    <option value="جيد">🙂 جيد</option>
+                    <option value="متوسط">😐 متوسط</option>
+                    <option value="سيء">🙁 سيء</option>
+                    <option value="سيء جداً">😡 سيء جداً</option>
+                </select>
             </div>
 
-            <a href="#" class="reset-link" onclick="resetForm(event)">Submit another response</a>
-        </div>
+            <div class="form-group">
+                <label for="customer_name">اسمك (اختياري)</label>
+                <input type="text" id="customer_name" placeholder="اكتب اسمك هنا">
+            </div>
+
+            <div class="form-group">
+                <label for="customer_mobile">رقم الجوال (اختياري)</label>
+                <input type="tel" id="customer_mobile" placeholder="05xxxxxxxx" dir="ltr" style="text-align: right;">
+            </div>
+
+            <div class="form-group">
+                <label for="comment">ملاحظاتك أو اقتراحاتك</label>
+                <textarea id="comment" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">إرسال التقييم</button>
+        </form>
+
+        <div class="success-msg" id="successMsg">شكراً لك! تم إرسال تقييمك بنجاح.</div>
     </div>
 
     <script>
@@ -353,28 +167,23 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // قراءة المتغيرات من رابط الـ QR (الفرع، الموظف، وبريد أو معرف الشركة)
         const urlParams = new URLSearchParams(window.location.search);
-        const storeId = urlParams.get('store');
+        const store = urlParams.get('store') || 'الفرع الرئيسي';
+        const emp = urlParams.get('emp') || 'عام';
+        const clientEmail = urlParams.get('client') || ''; // بريد الشركة المرفق في الرابط
 
-        function selectRating(val, btnElement, label, emoji) {
-            document.getElementById('rating-value').value = val;
-            document.getElementById('rating-label').value = label;
-            document.getElementById('rating-emoji').value = emoji;
-            
-            const buttons = document.querySelectorAll('.rating-btn');
-            buttons.forEach(b => b.classList.remove('active'));
-            btnElement.classList.add('active');
-        }
+        document.getElementById('target-info').innerHTML = `الفرع: <strong>${store}</strong> | الموظف: <strong>${emp}</strong>`;
 
-        async function submitEvaluation() {
-            const rating = document.getElementById('rating-value').value;
-            const label = document.getElementById('rating-label').value;
-            const emoji = document.getElementById('rating-emoji').value;
-            const customer_name = document.getElementById('name-input').value.trim();
-            const customer_mobile = document.getElementById('mobile-input').value.trim();
-            const comment = document.getElementById('comment-input').value.trim();
+        async function submitRating(event) {
+            event.preventDefault();
 
-            const submitBtn = document.querySelector('.submit-btn');
+            const rating = document.getElementById('rating').value;
+            const customerName = document.getElementById('customer_name').value.trim();
+            const customerMobile = document.getElementById('customer_mobile').value.trim();
+            const comment = document.getElementById('comment').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+
             submitBtn.innerText = 'جاري الإرسال...';
             submitBtn.disabled = true;
 
@@ -382,41 +191,28 @@
                 const { error } = await supabaseClient
                     .from('evaluations')
                     .insert([
-                        { 
-                            rating: parseInt(rating), 
-                            customer_name: customer_name || null, 
-                            customer_mobile: customer_mobile || null, 
-                            comment: comment || null,
-                            emp_id: 'سارة أحمد',
-                            store_id: storeId || null 
+                        {
+                            rating: rating,
+                            customer_name: customerName,
+                            customer_mobile: customerMobile,
+                            comment: comment,
+                            store_id: store,
+                            emp_id: emp,
+                            client_email: clientEmail // ربط التقييم بحساب الشركة مباشرة
                         }
                     ]);
 
                 if (error) throw error;
 
-                // عرض شاشة النجاح المخصصة وتمرير الأيموجي المختار
-                document.getElementById('success-emoji').innerText = emoji;
-                document.getElementById('success-label').innerText = label;
-                
-                document.getElementById('form-content').style.display = 'none';
-                document.getElementById('success-content').style.display = 'block';
+                document.getElementById('ratingForm').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'block';
 
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء الإرسال: ' + (err.message || JSON.stringify(err)));
-            } finally {
+                alert('حدث خطأ أثناء إرسال التقييم، يجدر المحاولة مجدداً.');
                 submitBtn.innerText = 'إرسال التقييم';
                 submitBtn.disabled = false;
             }
-        }
-
-        function resetForm(e) {
-            e.preventDefault();
-            document.getElementById('name-input').value = '';
-            document.getElementById('mobile-input').value = '';
-            document.getElementById('comment-input').value = '';
-            document.getElementById('success-content').style.display = 'none';
-            document.getElementById('form-content').style.display = 'block';
         }
     </script>
 </body>
