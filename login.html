@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل دخول العملاء - منصة التقييمات</title>
+    <title>تسجيل دخول المشتركين - منصة تزين</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         
@@ -111,6 +112,13 @@
         .login-btn:hover {
             background: #1e40af;
         }
+
+        .error-msg {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -118,39 +126,71 @@
     <div class="login-card">
         <div class="logo-badge">تـ</div>
         <h1>بوابة دخول المشتركين</h1>
-        <p>أدخل بيانات متجرك أو مركزك للوصول للوحة التحكم</p>
+        <p>أدخل بريدك الإلكتروني وكلمة المرور الخاصة بشركتك</p>
 
         <div class="form-group">
-            <label for="client-name">اسم الشركة أو المركز التجاري</label>
-            <input type="text" id="client-name" placeholder="مثال: مركز لافندر للتجميل">
+            <label for="client-email">البريد الإلكتروني للشركة</label>
+            <input type="email" id="client-email" placeholder="name@company.com">
         </div>
 
         <div class="form-group">
-            <label for="client-logo">رابط شعار الشركة (اختياري)</label>
-            <input type="text" id="client-logo" placeholder="ضع رابط شعار شركتك هنا...">
+            <label for="client-password">كلمة المرور</label>
+            <input type="password" id="client-password" placeholder="••••••••">
         </div>
 
-        <button class="login-btn" onclick="handleLogin()">دخول لوحة التحكم</button>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">تسجيل الدخول</button>
+        <p class="error-msg" id="errorMsg">البريد الإلكتروني أو كلمة المرور غير صحيحة!</p>
     </div>
 
     <script>
-        function handleLogin() {
-            const name = document.getElementById('client-name').value.trim();
-            const logo = document.getElementById('client-logo').value.trim();
+        const SUPABASE_URL = 'https://tmiqnvzlnnvhjswkkdrk.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            if (!name) {
-                alert('الرجاء إدخال اسم الشركة أو المركز!');
+        async function handleLogin() {
+            const email = document.getElementById('client-email').value.trim();
+            const password = document.getElementById('client-password').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                errorMsg.innerText = 'الرجاء إدخال البريد وكلمة المرور!';
+                errorMsg.style.display = 'block';
                 return;
             }
 
-            // حفظ بيانات العميل في الذاكرة المحلية للجلسة
-            localStorage.setItem('client_name', name);
-            if (logo) {
-                localStorage.setItem('client_logo', logo);
-            }
+            loginBtn.innerText = 'جاري التحقق...';
+            loginBtn.disabled = true;
+            errorMsg.style.display = 'none';
 
-            // الانتقال للوحة التحكم الخاصة به
-            window.location.href = 'dashboard.html';
+            try {
+                // البحث عن الشركة في جدول clients بناءً على البريد وكلمة المرور
+                const { data, error } = await supabaseClient
+                    .from('clients')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('بيانات الدخول غير مطابقة');
+                }
+
+                // حفظ بيانات الشركة المشتركة في الذاكرة المحلية للجلسة
+                localStorage.setItem('client_name', data.company_name);
+                localStorage.setItem('client_logo', data.logo_url || '');
+                localStorage.setItem('client_email', data.email);
+
+                // الانتقال للوحة التحكم الخاصة بالعميل
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                console.error(err);
+                errorMsg.innerText = 'البريد الإلكتروني أو كلمة المرور غير صحيحة!';
+                errorMsg.style.display = 'block';
+                loginBtn.innerText = 'تسجيل الدخول';
+                loginBtn.disabled = false;
+            }
         }
     </script>
 </body>
