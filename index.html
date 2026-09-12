@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقييم الخدمة</title>
+    <title>تقييم الخدمة - منصة تزين</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -30,9 +30,9 @@
             box-sizing: border-box;
         }
 
-        .rating-card {
+        .rate-card {
             background: var(--bg-card);
-            padding: 30px;
+            padding: 35px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px rgba(30, 58, 138, 0.05);
@@ -42,52 +42,64 @@
             text-align: center;
         }
 
-        .rating-card h2 {
-            font-size: 20px;
+        .logo-badge {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+        }
+
+        .rate-card h1 {
+            font-size: 18px;
             color: var(--primary-color);
             margin: 0 0 5px 0;
             font-weight: 700;
         }
 
-        .rating-card p {
+        .emp-info {
             font-size: 13px;
             color: var(--text-muted);
-            margin: 0 0 20px 0;
-        }
-
-        .emp-badge-info {
-            background: var(--primary-light);
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: var(--primary-color);
+            margin-bottom: 25px;
             font-weight: 600;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: right;
         }
 
         .form-group label {
             display: block;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .form-group input, .form-group textarea, .form-group select {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 12px 16px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             font-family: 'Cairo', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             outline: none;
             background: #fafafa;
             box-sizing: border-box;
+            color: var(--text-main);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 90px;
         }
 
         .submit-btn {
@@ -109,57 +121,58 @@
             background: #1e40af;
         }
 
-        .success-msg {
-            display: none;
-            color: #059669;
-            font-weight: 700;
-            font-size: 16px;
+        .msg {
+            font-size: 13px;
             margin-top: 15px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .error-msg {
+            color: #dc2626;
+        }
+
+        .success-msg {
+            color: #059669;
         }
     </style>
 </head>
 <body>
 
-    <div class="rating-card">
-        <h2>قيم تجربتك معنا</h2>
-        <p>رأيك يهمنا لتحسين جودة الخدمة</p>
+    <div class="rate-card" id="rateCardContainer">
+        <div class="logo-badge">تـ</div>
+        <h1>تقييم مستوى الخدمة</h1>
+        <div class="emp-info" id="empInfoText">جاري تحميل بيانات الموظف...</div>
 
-        <div class="emp-badge-info" id="target-info">
-            جاري تحميل بيانات الخدمة...
+        <div class="form-group">
+            <label for="rating-select">كيف تقيم تجربتك معنا؟</label>
+            <select id="rating-select">
+                <option value="ممتاز">😁 ممتاز</option>
+                <option value="جيد">🙂 جيد</option>
+                <option value="متوسط">😐 متوسط</option>
+                <option value="سيء">🙁 سيء</option>
+                <option value="سيء جداً">😡 سيء جداً</option>
+            </select>
         </div>
 
-        <form id="ratingForm" onsubmit="submitRating(event)">
-            <div class="form-group">
-                <label for="rating">التقييم العام</label>
-                <select id="rating" required>
-                    <option value="">اختر التقييم...</option>
-                    <option value="ممتاز">😁 ممتاز</option>
-                    <option value="جيد">🙂 جيد</option>
-                    <option value="متوسط">😐 متوسط</option>
-                    <option value="سيء">🙁 سيء</option>
-                    <option value="سيء جداً">😡 سيء جداً</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="cust-name">اسمك الكريم (اختياري)</label>
+            <input type="text" id="cust-name" placeholder="مثال: محمد علي">
+        </div>
 
-            <div class="form-group">
-                <label for="customer_name">اسمك (اختياري)</label>
-                <input type="text" id="customer_name" placeholder="اكتب اسمك هنا">
-            </div>
+        <div class="form-group">
+            <label for="cust-mobile">رقم الجوال (اختياري)</label>
+            <input type="tel" id="cust-mobile" placeholder="05xxxxxxxx" dir="ltr" style="text-align: right;">
+        </div>
 
-            <div class="form-group">
-                <label for="customer_mobile">رقم الجوال (اختياري)</label>
-                <input type="tel" id="customer_mobile" placeholder="05xxxxxxxx" dir="ltr" style="text-align: right;">
-            </div>
+        <div class="form-group">
+            <label for="cust-comment">ملاحظاتك أو اقتراحاتك</label>
+            <textarea id="cust-comment" placeholder="شاركنا رأيك لتحسين خدماتنا..."></textarea>
+        </div>
 
-            <div class="form-group">
-                <label for="comment">ملاحظاتك أو اقتراحاتك</label>
-                <textarea id="comment" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submitBtn">إرسال التقييم</button>
-        </form>
-
-        <div class="success-msg" id="successMsg">شكراً لك! تم إرسال تقييمك بنجاح.</div>
+        <button class="submit-btn" id="submitBtn" onclick="submitEvaluation()">إرسال التقييم</button>
+        <p class="msg error-msg" id="errorMsg">حدث خطأ أثناء إرسال التقييم، يرجى المحاولة مجدداً.</p>
+        <p class="msg success-msg" id="successMsg">شكراً لك! تم إرسال تقييمك بنجاح.</p>
     </div>
 
     <script>
@@ -167,49 +180,70 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // قراءة المتغيرات من رابط الـ QR (الفرع، الموظف، وبريد أو معرف الشركة)
+        // قراءة البارامترات من رابط الـ QR
         const urlParams = new URLSearchParams(window.location.search);
-        const store = urlParams.get('store') || 'الفرع الرئيسي';
-        const emp = urlParams.get('emp') || 'عام';
-        const clientEmail = urlParams.get('client') || ''; // بريد الشركة المرفق في الرابط
+        const storeName = urlParams.get('store') || 'الفرع الرئيسي';
+        const empName = urlParams.get('emp') || 'موظف خدمة العملاء';
+        const clientEmail = urlParams.get('client') || '';
 
-        document.getElementById('target-info').innerHTML = `الفرع: <strong>${store}</strong> | الموظف: <strong>${emp}</strong>`;
+        // عرض تفاصيل الفرع والموظف في الترويسة
+        document.getElementById('empInfoText').innerHTML = `الفرع: <strong>${storeName}</strong><br>الموظف: <strong>${empName}</strong>`;
 
-        async function submitRating(event) {
-            event.preventDefault();
-
-            const rating = document.getElementById('rating').value;
-            const customerName = document.getElementById('customer_name').value.trim();
-            const customerMobile = document.getElementById('customer_mobile').value.trim();
-            const comment = document.getElementById('comment').value.trim();
+        async function submitEvaluation() {
+            const rating = document.getElementById('rating-select').value;
+            const customerName = document.getElementById('cust-name').value.trim();
+            const customerMobile = document.getElementById('cust-mobile').value.trim();
+            const comment = document.getElementById('cust-comment').value.trim();
+            
             const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+
+            if (!clientEmail) {
+                errorMsg.innerText = 'رابط التقييم غير صالح (معرف الشركة مفقود)';
+                errorMsg.style.display = 'block';
+                return;
+            }
 
             submitBtn.innerText = 'جاري الإرسال...';
             submitBtn.disabled = true;
 
             try {
+                // إرسال البيانات مع حفظ بريد الشركة المشتركة لضمان ظهورها في لوحة التحكم الخاصة بها حصرياً
                 const { error } = await supabaseClient
                     .from('evaluations')
                     .insert([
                         {
+                            client_email: clientEmail,
+                            store_id: storeName,
+                            emp_id: empName,
                             rating: rating,
-                            customer_name: customerName,
+                            customer_name: customerName || 'زائر كريم',
                             customer_mobile: customerMobile,
-                            comment: comment,
-                            store_id: store,
-                            emp_id: emp,
-                            client_email: clientEmail // ربط التقييم بحساب الشركة مباشرة
+                            comment: comment
                         }
                     ]);
 
                 if (error) throw error;
 
-                document.getElementById('ratingForm').style.display = 'none';
-                document.getElementById('successMsg').style.display = 'block';
+                successMsg.style.display = 'block';
+                submitBtn.innerText = 'تم الإرسال بنجاح';
+                
+                setTimeout(() => {
+                    document.getElementById('rating-select').disabled = true;
+                    document.getElementById('cust-name').disabled = true;
+                    document.getElementById('cust-mobile').disabled = true;
+                    document.getElementById('cust-comment').disabled = true;
+                    submitBtn.style.display = 'none';
+                }, 1000);
 
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء إرسال التقييم، يجدر المحاولة مجدداً.');
+                errorMsg.innerText = 'حدث خطأ أثناء إرسال التقييم، يرجى المحاولة مجدداً.';
+                errorMsg.style.display = 'block';
                 submitBtn.innerText = 'إرسال التقييم';
                 submitBtn.disabled = false;
             }
