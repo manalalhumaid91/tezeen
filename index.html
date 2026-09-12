@@ -132,47 +132,136 @@
             color: #dc2626;
         }
 
-        .success-msg {
-            color: #059669;
+        /* تنسيقات شاشة الشكر المطابقة للصورة تماماً */
+        .success-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .success-icon-badge {
+            width: 75px;
+            height: 75px;
+            background: #f0fdf4;
+            color: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            margin: 0 auto 20px auto;
+            border: 2px solid #bbf7d0;
+        }
+
+        .success-screen h2 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            font-weight: 700;
+        }
+
+        .success-screen p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0 0 25px 0;
+            font-weight: 600;
+        }
+
+        .submitted-badge-preview {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 16px;
+            padding: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .submitted-badge-preview span {
+            font-size: 24px;
+        }
+
+        .submitted-badge-preview .badge-text {
+            text-align: right;
+        }
+
+        .submitted-badge-preview .badge-text h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #d97706;
+            font-weight: 700;
+        }
+
+        .reset-link {
+            display: block;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .reset-link:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
     <div class="rate-card" id="rateCardContainer">
-        <div class="logo-badge">تـ</div>
-        <h1>تقييم مستوى الخدمة</h1>
-        <div class="emp-info" id="empInfoText">جاري تحميل بيانات الموظف...</div>
+        <!-- نموذج التقييم الأساسي -->
+        <div id="formContent">
+            <div class="logo-badge">تـ</div>
+            <h1>تقييم مستوى الخدمة</h1>
+            <div class="emp-info" id="empInfoText">جاري تحميل بيانات الموظف...</div>
 
-        <div class="form-group">
-            <label for="rating-select">كيف تقيم تجربتك معنا؟</label>
-            <select id="rating-select">
-                <option value="ممتاز">😁 ممتاز</option>
-                <option value="جيد">🙂 جيد</option>
-                <option value="متوسط">😐 متوسط</option>
-                <option value="سيء">🙁 سيء</option>
-                <option value="سيء جداً">😡 سيء جداً</option>
-            </select>
+            <div class="form-group">
+                <label for="rating-select">كيف تقيم تجربتك معنا؟</label>
+                <select id="rating-select">
+                    <option value="ممتاز">😁 ممتاز</option>
+                    <option value="جيد">🙂 جيد</option>
+                    <option value="متوسط">😐 متوسط</option>
+                    <option value="سيء">🙁 سيء</option>
+                    <option value="سيء جداً">😡 سيء جداً</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="cust-name">اسمك الكريم (اختياري)</label>
+                <input type="text" id="cust-name" placeholder="مثال: محمد علي">
+            </div>
+
+            <div class="form-group">
+                <label for="cust-mobile">رقم الجوال (اختياري)</label>
+                <input type="tel" id="cust-mobile" placeholder="05xxxxxxxx" dir="ltr" style="text-align: right;">
+            </div>
+
+            <div class="form-group">
+                <label for="cust-comment">ملاحظاتك أو اقتراحاتك</label>
+                <textarea id="cust-comment" placeholder="شاركنا رأيك لتحسين خدماتنا..."></textarea>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" onclick="submitEvaluation()">إرسال التقييم</button>
+            <p class="msg error-msg" id="errorMsg">حدث خطأ أثناء إرسال التقييم، يرجى المحاولة مجدداً.</p>
         </div>
 
-        <div class="form-group">
-            <label for="cust-name">اسمك الكريم (اختياري)</label>
-            <input type="text" id="cust-name" placeholder="مثال: محمد علي">
-        </div>
+        <!-- شاشة رسالة الشكر المطابقة تماماً للتصميم -->
+        <div class="success-screen" id="successScreen">
+            <div class="success-icon-badge">✓</div>
+            <h2>شكراً لك</h2>
+            <p>تقييمك وصل.. وبـ رأيك تزين خدمتنا</p>
+            
+            <div class="submitted-badge-preview">
+                <span id="chosenRatingEmoji">🙁</span>
+                <div class="badge-text">
+                    <h4 id="chosenRatingText">سيء</h4>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="cust-mobile">رقم الجوال (اختياري)</label>
-            <input type="tel" id="cust-mobile" placeholder="05xxxxxxxx" dir="ltr" style="text-align: right;">
+            <a class="reset-link" onclick="window.location.reload()">Submit another response</a>
         </div>
-
-        <div class="form-group">
-            <label for="cust-comment">ملاحظاتك أو اقتراحاتك</label>
-            <textarea id="cust-comment" placeholder="شاركنا رأيك لتحسين خدماتنا..."></textarea>
-        </div>
-
-        <button class="submit-btn" id="submitBtn" onclick="submitEvaluation()">إرسال التقييم</button>
-        <p class="msg error-msg" id="errorMsg">حدث خطأ أثناء إرسال التقييم، يرجى المحاولة مجدداً.</p>
-        <p class="msg success-msg" id="successMsg">شكراً لك! تم إرسال تقييمك بنجاح.</p>
     </div>
 
     <script>
@@ -188,17 +277,16 @@
         document.getElementById('empInfoText').innerHTML = `الفرع: <strong>${storeName}</strong><br>الموظف: <strong>${empName}</strong>`;
 
         async function submitEvaluation() {
-            const rating = document.getElementById('rating-select').value;
+            const ratingSelect = document.getElementById('rating-select');
+            const rating = ratingSelect.value;
             const customerName = document.getElementById('cust-name').value.trim();
             const customerMobile = document.getElementById('cust-mobile').value.trim();
             const comment = document.getElementById('cust-comment').value.trim();
             
             const submitBtn = document.getElementById('submitBtn');
             const errorMsg = document.getElementById('errorMsg');
-            const successMsg = document.getElementById('successMsg');
 
             errorMsg.style.display = 'none';
-            successMsg.style.display = 'none';
 
             if (!clientEmail) {
                 errorMsg.innerText = 'رابط التقييم غير صالح (معرف الشركة مفقود في الرابط)';
@@ -229,16 +317,12 @@
                     throw error;
                 }
 
-                successMsg.style.display = 'block';
-                submitBtn.innerText = 'تم الإرسال بنجاح';
+                // عرض بطاقة الشكر المطابقة للصورة وإخفاء نموذج الإدخال
+                document.getElementById('chosenRatingEmoji').innerText = ratingSelect.options[ratingSelect.selectedIndex].text.split(' ')[0];
+                document.getElementById('chosenRatingText').innerText = ratingSelect.options[ratingSelect.selectedIndex].text.split(' ')[1] || rating;
                 
-                setTimeout(() => {
-                    document.getElementById('rating-select').disabled = true;
-                    document.getElementById('cust-name').disabled = true;
-                    document.getElementById('cust-mobile').disabled = true;
-                    document.getElementById('cust-comment').disabled = true;
-                    submitBtn.style.display = 'none';
-                }, 1000);
+                document.getElementById('formContent').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
 
             } catch (err) {
                 console.error("Catch Exception:", err);
