@@ -24,7 +24,7 @@
             margin: 0 auto;
         }
 
-        /* ترويسة لوحة التحكم */
+        /* الترويسة العلوية: الشعار والاسم يمين، والإعدادات وتسجيل الخروج يسار */
         .dashboard-header {
             background: #ffffff;
             padding: 20px 30px;
@@ -104,71 +104,7 @@
             background: #fecaca;
         }
 
-        /* إحصائيات علوية */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-
-        .stat-card h3 {
-            margin: 0 0 15px 0;
-            font-size: 15px;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .stat-card .value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1e3a8a;
-            margin: 0;
-        }
-
-        /* شريط الفلاتر والبحث */
-        .filter-bar {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 25px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-
-        .filter-bar select, .filter-bar input {
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            font-family: 'Cairo', sans-serif;
-            font-size: 14px;
-            outline: none;
-            background: #fafafa;
-        }
-
-        .filter-bar input {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .filter-bar select {
-            min-width: 180px;
-        }
-
-        /* البطاقات العامة */
+        /* البطاقات والنماذج */
         .card {
             background: #ffffff;
             padding: 25px;
@@ -296,7 +232,71 @@
             box-sizing: border-box;
         }
 
-        /* الجدول */
+        /* إحصائيات علوية لوحة التقييمات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 15px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        /* شريط الفلاتر والبحث */
+        .filter-bar {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .filter-bar input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-bar select {
+            min-width: 180px;
+        }
+
+        /* جدول التقييمات */
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -362,13 +362,13 @@
 <body>
 
     <div class="container">
-        <!-- ترويسة لوحة التحكم -->
+        <!-- 1. الترويسة العلوية: الشعار واسم المركز يمين، الإعدادات وتسجيل الخروج يسار -->
         <header class="dashboard-header">
             <div class="brand-section">
                 <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150" alt="شعار المركز" class="brand-logo" id="header-logo">
                 <div class="brand-info">
                     <h1 id="header-center-name">مركز تزين للجمال</h1>
-                    <p>لوحة تحكم إدارة التقييمات والموظفين</p>
+                    <p>لوحة التحكم والإدارة</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -377,23 +377,7 @@
             </div>
         </header>
 
-        <!-- إحصائيات علوية -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>إجمالي التقييمات</h3>
-                <p class="value" id="total-reviews">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>متوسط التقييم العام</h3>
-                <p class="value" id="avg-rating">5 / 0.0</p>
-            </div>
-            <div class="stat-card">
-                <h3>الرضا العام</h3>
-                <p class="value" id="satisfaction-rate">0%</p>
-            </div>
-        </div>
-
-        <!-- نموذج إضافة موظف وتوليد الباركود -->
+        <!-- 2. قسم إضافة موظف وتوليد الباركود -->
         <div class="card">
             <h2>إضافة موظف جديد وتوليد باركود التقييم</h2>
             <form id="add-employee-form" onsubmit="addEmployee(event)">
@@ -429,7 +413,23 @@
             </div>
         </div>
 
-        <!-- شريط الفلاتر والبحث -->
+        <!-- 3. لوحة تحكم التقييمات والإحصائيات -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>إجمالي التقييمات</h3>
+                <p class="value" id="total-reviews">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>متوسط التقييم العام</h3>
+                <p class="value" id="avg-rating">5 / 0.0</p>
+            </div>
+            <div class="stat-card">
+                <h3>الرضا العام</h3>
+                <p class="value" id="satisfaction-rate">0%</p>
+            </div>
+        </div>
+
+        <!-- شريط الفلاتر والبحث للتقييمات -->
         <div class="filter-bar">
             <select id="filter-branch" onchange="filterTable()">
                 <option value="">جميع الفروع</option>
