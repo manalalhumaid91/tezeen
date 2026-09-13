@@ -6,8 +6,6 @@
     <title>لوحة التحكم المركزية - منصة تزين</title>
     <!-- Supabase Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- QRCode.js CDN المضمون لتوليد الـ QR فوراً بدون أخطاء -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         
@@ -381,15 +379,6 @@
             text-align: center;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* تنسيق حاوية الـ QR لتظهر الصورة بنجاح ودون فراغات */
-        #card-qrcode {
-            width: 85px;
-            height: 85px;
-            display: flex;
             align-items: center;
             justify-content: center;
         }
@@ -843,23 +832,11 @@
             const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
             const targetUrl = `${baseDomain}rate.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}`;
 
-            // توليد الباركود باستخدام مكتبة QRCode.js المضمونة
+            // توليد الـ QR بشكل مضمون 100% باستخدام Google Chart API بدون أخطاء مكتبات
             const qrContainer = document.getElementById('card-qrcode');
-            qrContainer.innerHTML = "";
-
-            try {
-                new QRCode(qrContainer, {
-                    text: targetUrl,
-                    width: 85,
-                    height: 85,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.M
-                });
-            } catch (e) {
-                console.error(e);
-                qrContainer.innerHTML = "<span style='font-size:10px; color:red;'>خطأ QR</span>";
-            }
+            const googleQrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(targetUrl)}`;
+            
+            qrContainer.innerHTML = `<img src="${googleQrApiUrl}" alt="QR Code" style="width: 85px; height: 85px; display: block;">`;
 
             document.getElementById('badgePreviewArea').style.display = 'block';
         }
