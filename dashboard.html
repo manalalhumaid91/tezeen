@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - التقييمات</title>
+    <title>لوحة التحكم - مركز تزين للجمال</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -19,6 +19,84 @@
         .container {
             max-width: 1100px;
             margin: 0 auto;
+        }
+
+        /* ترويسة لوحة التحكم العلوية (الشعار، الاسم، الإعدادات، وتسجيل الخروج) */
+        .dashboard-header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+        }
+
+        .brand-info h1 {
+            font-size: 18px;
+            color: #1e3a8a;
+            margin: 0 0 4px 0;
+            font-weight: 700;
+        }
+
+        .brand-info p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .logout-btn {
+            background: #fee2e2;
+            color: #991b1b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .logout-btn:hover {
+            background: #fecaca;
         }
 
         /* إحصائيات علوية */
@@ -163,6 +241,22 @@
 <body>
 
     <div class="container">
+        <!-- ترويسة لوحة التحكم (شعار المركز، الاسم، الإعدادات، وتسجيل الخروج) -->
+        <header class="dashboard-header">
+            <div class="brand-section">
+                <!-- شعار مركز تزين -->
+                <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150" alt="شعار تزين" class="brand-logo" id="brand-logo-img">
+                <div class="brand-info">
+                    <h1 id="center-name-text">مركز تزين للجمال</h1>
+                    <p>لوحة تحكم إدارة وتقييم الخدمات</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" onclick="openSettings()">الإعدادات</button>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </header>
+
         <!-- الإحصائيات العلوية -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -276,7 +370,6 @@
                 return;
             }
 
-            // حساب المتوسط بناءً على القيم الرقمية للتقييم إن وجدت أو افتراضية
             const sum = data.reduce((acc, curr) => acc + (Number(curr.rating_value) || 3), 0);
             const avg = (sum / total).toFixed(1);
             document.getElementById('avg-rating').textContent = `5 / ${avg}`;
@@ -334,6 +427,14 @@
 
             renderTable(filtered);
             updateStats(filtered);
+        }
+
+        function openSettings() {
+            alert('شاشة الإعدادات الخاصة بالمركز.');
+        }
+
+        function logout() {
+            window.location.href = 'login.html';
         }
     </script>
 </body>
