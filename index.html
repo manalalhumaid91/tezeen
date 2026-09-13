@@ -231,6 +231,7 @@
             text-decoration: none;
             font-weight: 600;
             transition: color 0.2s;
+            cursor: pointer;
         }
 
         .reset-link:hover {
@@ -306,7 +307,7 @@
             <span class="selected-emoji-text" id="chosen-emoji-label">ممتاز</span>
         </div>
 
-        <a href="#" class="reset-link" onclick="location.reload(); return false;">Submit another response</a>
+        <a class="reset-link" onclick="location.reload();">تقييم آخر</a>
     </div>
 
     <footer class="footer-tazeen">
@@ -329,17 +330,12 @@
         document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
         document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
 
-        // جلب صورة الموظف المعينة
+        // معالجة صورة الموظف بأمان
         if (urlPhoto) {
             try {
                 document.getElementById('emp-avatar-img').src = decodeURIComponent(urlPhoto);
-            } catch(e) {}
-        } else {
-            const cleanEmp = empName.trim();
-            const cleanStore = storeName.trim();
-            const localPhoto = localStorage.getItem(`emp_photo_${cleanEmp}_${cleanStore}`) || localStorage.getItem(`emp_photo_${cleanEmp}`);
-            if (localPhoto) {
-                document.getElementById('emp-avatar-img').src = localPhoto;
+            } catch(e) {
+                console.log('خطأ في تحميل الصورة من الرابط');
             }
         }
 
