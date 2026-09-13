@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - تزين الخدمة</title>
-    <!-- مكتبة Supabase -->
+    <title>لوحة التحكم</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- مكتبة توليد الباركود QR Code -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -189,7 +187,6 @@
             <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
         </header>
 
-        <!-- نموذج إضافة موظف جديد -->
         <div class="card">
             <h2>إضافة موظف جديد وتوليد باركود التقييم</h2>
             <form id="add-employee-form" onsubmit="addEmployee(event)">
@@ -217,12 +214,9 @@
             </form>
         </div>
 
-        <!-- قائمة الموظفين والباركودات الخاصة بهم -->
         <div class="card">
             <h2>قائمة الموظفين والباركودات النشطة</h2>
-            <div id="employees-list" class="employees-grid">
-                <!-- سيتم تعبئتها تلقائياً برمجياً -->
-            </div>
+            <div id="employees-list" class="employees-grid"></div>
         </div>
     </div>
 
@@ -250,15 +244,13 @@
                 }
 
                 listContainer.innerHTML = '';
-                
-                // استخدام النطاق الصريح لضمان عدم حدوث خطأ 404 نهائياً
-                const cleanOrigin = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                const currentBasePath = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
 
                 data.forEach((emp, index) => {
                     const card = document.createElement('div');
                     card.className = 'emp-card';
 
-                    const targetUrl = `${cleanOrigin}index.html?store=${encodeURIComponent(emp.store_name || emp.store || '')}&emp=${encodeURIComponent(emp.emp_name || emp.name || '')}&company=${encodeURIComponent(emp.company_name || 'تزين')}&photo=${encodeURIComponent(emp.photo_url || emp.photo || '')}`;
+                    const targetUrl = `${currentBasePath}index.html?store=${encodeURIComponent(emp.store_name || emp.store || '')}&emp=${encodeURIComponent(emp.emp_name || emp.name || '')}&company=${encodeURIComponent(emp.company_name || 'تزين')}&photo=${encodeURIComponent(emp.photo_url || emp.photo || '')}`;
 
                     card.innerHTML = `
                         <img src="${emp.photo_url || emp.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" alt="صورة الموظف">
@@ -319,7 +311,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء حفظ الموظف. تأكد من وجود جدول باسم employees في قاعدة بيانات Supabase.');
+                alert('حدث خطأ أثناء حفظ الموظف.');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerText = 'حفظ الموظف وتوليد الباركود';
