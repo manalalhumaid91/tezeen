@@ -829,10 +829,11 @@
             document.getElementById('card-company-name').innerText = currentClient.name;
             document.getElementById('card-avatar').src = photoUrl;
 
-            const baseDomain = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-            const targetUrl = `${baseDomain}rate.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}`;
+            // استهداف index.html مباشرةً في نفس الرابط الأساسي للموقع
+            const originPath = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const targetUrl = `${originPath}index.html?store=${encodeURIComponent(store)}&emp=${encodeURIComponent(name)}&client=${encodeURIComponent(currentClient.email)}&company=${encodeURIComponent(currentClient.name)}`;
 
-            // توليد الـ QR بشكل مضمون 100% باستخدام Google Chart API بدون أخطاء مكتبات
+            // توليد الباركود ليوجه إلى index.html بدون أخطاء 404
             const qrContainer = document.getElementById('card-qrcode');
             const googleQrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(targetUrl)}`;
             
