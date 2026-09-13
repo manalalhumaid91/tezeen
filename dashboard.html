@@ -11,22 +11,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
         
-        :root {
-            --primary-color: #1e3a8a;
-            --primary-light: #f0f6ff;
-            --border-color: #e2e8f0;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-        }
-
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: var(--bg-body);
+            background-color: #f8fafc;
             margin: 0;
             padding: 20px;
-            color: var(--text-main);
+            color: #1e293b;
         }
 
         .container {
@@ -38,17 +28,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-card);
+            background: #ffffff;
             padding: 20px 30px;
             border-radius: 16px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             margin-bottom: 25px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
         h1 {
             font-size: 20px;
-            color: var(--primary-color);
+            color: #1e3a8a;
             margin: 0;
         }
 
@@ -62,25 +52,20 @@
             font-family: 'Cairo', sans-serif;
             font-weight: 700;
             font-size: 13px;
-            transition: background 0.2s;
-        }
-
-        .logout-btn:hover {
-            background: #fecaca;
         }
 
         .card {
-            background: var(--bg-card);
+            background: #ffffff;
             padding: 25px;
             border-radius: 16px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             margin-bottom: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
 
         h2 {
             font-size: 16px;
-            color: var(--text-main);
+            color: #1e293b;
             margin-top: 0;
             margin-bottom: 15px;
             font-weight: 700;
@@ -94,7 +79,7 @@
             display: block;
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: #64748b;
             margin-bottom: 6px;
         }
 
@@ -102,7 +87,7 @@
             width: 100%;
             padding: 12px 14px;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             font-family: 'Cairo', sans-serif;
             font-size: 14px;
             outline: none;
@@ -111,12 +96,12 @@
         }
 
         .form-group input:focus {
-            border-color: var(--primary-color);
+            border-color: #1e3a8a;
             background: #fff;
         }
 
         .btn {
-            background: var(--primary-color);
+            background: #1e3a8a;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -125,7 +110,6 @@
             font-family: 'Cairo', sans-serif;
             font-size: 14px;
             font-weight: 700;
-            transition: background 0.2s;
         }
 
         .btn:hover {
@@ -141,7 +125,7 @@
 
         .emp-card {
             background: #fff;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             border-radius: 16px;
             padding: 20px;
             text-align: center;
@@ -154,18 +138,18 @@
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 10px;
-            border: 3px solid var(--primary-light);
+            border: 3px solid #f0f6ff;
         }
 
         .emp-card h3 {
             margin: 5px 0;
             font-size: 16px;
-            color: var(--text-main);
+            color: #1e293b;
         }
 
         .emp-card p {
             font-size: 13px;
-            color: var(--text-muted);
+            color: #64748b;
             margin: 0 0 15px 0;
         }
 
@@ -247,8 +231,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // التحقق من تسجيل الدخول (إذا كانت صفحة تسجيل الدخول موجودة)
-        // يمكن تعديلها حسب رغبتك، هنا سنقوم بجلب البيانات مباشرة
         window.addEventListener('DOMContentLoaded', () => {
             fetchEmployees();
         });
@@ -258,35 +240,24 @@
             listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">جاري تحميل الموظفين...</p>';
 
             try {
-                // جلب الموظفين من جدول evaluations أو جدول مخصص (هنا سنفترض جدول evaluations أو جلبهم من localStorage/Supabase)
-                // بما أن البيانات تخزن في Supabase، سنقوم بجلب الموظفين الفريدين أو جلبهم من جدول خاص بك (مثال جدول employees)
-                // للتوضيح والاعتماد على جدول الموظفين الفعلي:
                 const { data, error } = await supabaseClient
-                    .from('employees') // تأكد من أن جدول الموظفين لديك بهذا الاسم أو قم بتعديله
+                    .from('employees')
                     .select('*');
 
-                if (error) {
-                    // إذا لم يوجد جدول employees بعد، سنعرض نموذج تجريبي أو تنبيه
+                if (error || !data || data.length === 0) {
                     listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">لا توجد بيانات موظفين مسجلة في قاعدة البيانات حالياً، أضف موظفاً جديداً بالأعلى.</p>';
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">لا يوجد موظفون مضافون حالياً.</p>';
                     return;
                 }
 
                 listContainer.innerHTML = '';
                 
-                // حساب الرابط الأساسي الصحيح بناءً على مكان وجود لوحة التحكم على GitHub Pages
-                // هذا يضمن أن الرابط يشير تماماً إلى index.html بجانب dashboard.html في نفس المسار
+                // الرابط الصحيح المتوافق تماماً مع مسار GitHub Pages لفتح index.html بدقة
                 const currentBasePath = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
 
                 data.forEach((emp, index) => {
                     const card = document.createElement('div');
                     card.className = 'emp-card';
 
-                    // بناء الرابط الموجه بدقة إلى صفحة index.html مع تمرير كافة المتجر والموظف والصورة
                     const targetUrl = `${currentBasePath}index.html?store=${encodeURIComponent(emp.store_name || emp.store || '')}&emp=${encodeURIComponent(emp.emp_name || emp.name || '')}&company=${encodeURIComponent(emp.company_name || 'تزين')}&photo=${encodeURIComponent(emp.photo_url || emp.photo || '')}`;
 
                     card.innerHTML = `
@@ -300,7 +271,6 @@
                     `;
                     listContainer.appendChild(card);
 
-                    // توليد الباركود فعلياً داخل الـ canvas
                     setTimeout(() => {
                         const canvasElement = document.getElementById(`qrcode-${index}`);
                         if (canvasElement) {
@@ -330,7 +300,6 @@
             saveBtn.innerText = 'جاري الحفظ...';
 
             try {
-                // حفظ البيانات في جدول employees في Supabase
                 const { error } = await supabaseClient
                     .from('employees')
                     .insert([
