@@ -88,6 +88,14 @@
             background: #e2e8f0;
         }
 
+        /* الأزرار التي تعمل كروابط تأخذ نفس شكل .action-btn */
+        a.action-btn {
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
         .logout-btn {
             background: #fee2e2;
             color: #991b1b;
@@ -205,6 +213,13 @@
             margin: 0 0 15px 0;
         }
 
+        .emp-card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
         .qrcode-container {
             background: #f8fafc;
             padding: 15px;
@@ -302,6 +317,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         table {
@@ -317,6 +334,7 @@
             padding: 14px;
             font-weight: 600;
             border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
         }
 
         td {
@@ -388,7 +406,18 @@
                     </div>
                     <div class="form-group">
                         <label for="emp-store">اسم الفرع</label>
-                        <input type="text" id="emp-store" placeholder="مثال: فرع الرياض" required>
+                        <input type="text" id="emp-store" placeholder="مثال: فرع الرياض" required list="branches-list">
+                        <datalist id="branches-list"></datalist>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="emp-title">المسمى الوظيفي</label>
+                        <input type="text" id="emp-title" placeholder="مثال: مضيف صالة">
+                    </div>
+                    <div class="form-group">
+                        <label for="emp-hire-date">تاريخ المباشرة</label>
+                        <input type="date" id="emp-hire-date" required>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -398,7 +427,7 @@
                     </div>
                     <div class="form-group">
                         <label for="emp-photo">رابط صورة الموظف (صورة شخصية عبر الإنترنت)</label>
-                        <input type="url" id="emp-photo" placeholder="https://example.com/photo.jpg" required>
+                        <input type="url" id="emp-photo" placeholder="https://example.com/photo.jpg">
                     </div>
                 </div>
                 <button type="submit" class="btn" id="save-btn">حفظ الموظف وتوليد الباركود</button>
@@ -407,7 +436,10 @@
 
         <!-- قائمة الموظفين والباركودات النشطة -->
         <div class="card">
-            <h2>قائمة الموظفين والباركودات النشطة</h2>
+            <div class="card-header">
+                <h2 style="margin-bottom:0;">قائمة الموظفين والباركودات النشطة</h2>
+                <button class="action-btn" onclick="exportEmployees()">تصدير قائمة الموظفين</button>
+            </div>
             <div id="employees-list" class="employees-grid">
                 <!-- تعبئة تلقائية -->
             </div>
@@ -435,20 +467,35 @@
                 <option value="">جميع الفروع</option>
             </select>
             <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterTable()">
+            <select id="filter-employee" onchange="filterTable()">
+                <option value="">جميع الموظفين</option>
+            </select>
             <select id="filter-rating" onchange="filterTable()">
                 <option value="">جميع التقييمات</option>
-                <option value="ممتاز">ممتاز</option>
-                <option value="جيد جداً">جيد جداً</option>
-                <option value="متوسط">متوسط</option>
-                <option value="سيء">سيء</option>
+                <option value="5">ممتاز</option>
+                <option value="4">جيد</option>
+                <option value="3">متوسط</option>
+                <option value="2">سيء</option>
+                <option value="1">سيء جداً</option>
+                <option value="low">جيد فأقل (يحتاج متابعة)</option>
+            </select>
+            <select id="filter-period" onchange="filterTable()">
+                <option value="">كل الفترات</option>
+                <option value="1">اليوم</option>
+                <option value="7">آخر 7 أيام</option>
+                <option value="30">آخر 30 يوم</option>
+                <option value="90">آخر 90 يوم</option>
             </select>
         </div>
 
         <!-- جدول التقييمات الواردة -->
         <div class="card">
             <div class="card-header">
-                <h2>سجل التقييمات الواردة</h2>
-                <button class="btn" style="padding: 10px 18px; font-size: 13px;" onclick="fetchReviews()">تحديث البيانات</button>
+                <h2 style="margin-bottom:0;">سجل التقييمات الواردة</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="action-btn" onclick="exportReviews()">تصدير Excel</button>
+                    <button class="btn" style="padding: 10px 18px; font-size: 13px;" onclick="fetchReviews()">تحديث البيانات</button>
+                </div>
             </div>
             <div style="overflow-x: auto;">
                 <table>
@@ -459,12 +506,13 @@
                             <th>رقم الجوال</th>
                             <th>التعليق</th>
                             <th>الموظف</th>
+                            <th>الفرع</th>
                             <th>الوقت</th>
                         </tr>
                     </thead>
                     <tbody id="reviews-table-body">
                         <tr>
-                            <td colspan="6" style="text-align: center; color: #64748b;">جاري تحميل البيانات...</td>
+                            <td colspan="7" style="text-align: center; color: #64748b;">جاري تحميل البيانات...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -483,7 +531,7 @@
                 </div>
                 <div class="form-group">
                     <label for="setting-logo-url">رابط شعار المركز (Logo URL)</label>
-                    <input type="url" id="setting-logo-url" placeholder="https://..." required>
+                    <input type="url" id="setting-logo-url" placeholder="https://...">
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                     <button type="button" class="action-btn" onclick="closeSettings()">إلغاء</button>
@@ -499,14 +547,38 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allReviews = [];
+        let allEmployees = [];
+        let currentClient = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        // ===== بوابة الدخول: لا لوحة بلا جلسة =====
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data } = await supabaseClient.auth.getSession();
+            if (!data.session) { window.location.replace('login.html'); return; }
+
+            const { data: client } = await supabaseClient
+                .from('clients')
+                .select('id, company_name, logo_url, email')
+                .maybeSingle();
+
+            if (!client) {
+                alert('الحساب غير مرتبط بشركة مشتركة.');
+                await supabaseClient.auth.signOut();
+                window.location.replace('login.html');
+                return;
+            }
+
+            currentClient = client;
+            localStorage.setItem('client_id', client.id);
+            if (client.company_name) localStorage.setItem('center_name', client.company_name);
+            if (client.logo_url) localStorage.setItem('center_logo', client.logo_url);
+
             loadHeaderSettings();
+            document.getElementById('company-name').value = client.company_name || '';
             fetchEmployees();
             fetchReviews();
         });
 
-        // إدارة إعدادات الهيدر (الشعار والاسم)
+        // ===== إعدادات الهيدر (الشعار والاسم) =====
         function loadHeaderSettings() {
             const savedName = localStorage.getItem('center_name');
             const savedLogo = localStorage.getItem('center_logo');
@@ -529,7 +601,7 @@
             document.getElementById('settings-modal').style.display = 'none';
         }
 
-        function saveSettings(event) {
+        async function saveSettings(event) {
             event.preventDefault();
             const name = document.getElementById('setting-center-name').value.trim();
             const logo = document.getElementById('setting-logo-url').value.trim();
@@ -537,12 +609,58 @@
             localStorage.setItem('center_name', name);
             localStorage.setItem('center_logo', logo);
 
+            // الحفظ في قاعدة البيانات أيضاً ليظهر على أي جهاز يدخل منه المشترك
+            if (currentClient) {
+                const { error } = await supabaseClient
+                    .from('clients')
+                    .update({ company_name: name, logo_url: logo })
+                    .eq('id', currentClient.id);
+                if (error) console.error(error);
+                else currentClient.company_name = name;
+            }
+
             loadHeaderSettings();
             closeSettings();
             alert('تم حفظ إعدادات المركز والشعار بنجاح!');
         }
 
-        // جلب وتوليد الموظفين والباركودات
+        // ===== أدوات مشتركة =====
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+        }
+
+        function fmtDateTime(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            const p = n => String(n).padStart(2, '0');
+            return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} - ${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+
+        function ratingEmoji(value) {
+            return { 5: '😁', 4: '🙂', 3: '😐', 2: '🙁', 1: '😡' }[value] || '😐';
+        }
+
+        function ratingLabel(value) {
+            return { 5: 'ممتاز', 4: 'جيد', 3: 'متوسط', 2: 'سيء', 1: 'سيء جداً' }[value] || 'غير محدد';
+        }
+
+        function downloadCsv(filename, rows) {
+            const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const csv = '\uFEFF' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function reviewLink(emp) {
+            const cleanOrigin = window.location.origin +
+                window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            return `${cleanOrigin}index.html?id=${encodeURIComponent(emp.id)}`;
+        }
+
+        // ===== جلب الموظفين وتوليد الباركودات =====
         async function fetchEmployees() {
             const listContainer = document.getElementById('employees-list');
             listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">جاري تحميل الموظفين...</p>';
@@ -550,41 +668,50 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('employees')
-                    .select('*');
+                    .select('*')
+                    .eq('client_id', currentClient.id)
+                    .order('emp_name');
 
-                if (error || !data || data.length === 0) {
-                    listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">لا توجد بيانات موظفين مسجلة في قاعدة البيانات حالياً.</p>';
+                if (error) throw error;
+
+                allEmployees = data || [];
+                populateEmployeeFilter();
+                populateBranchDatalist();
+
+                if (!allEmployees.length) {
+                    listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">لا توجد بيانات موظفين مسجلة حالياً. أضف أول موظف من النموذج بالأعلى.</p>';
                     return;
                 }
 
                 listContainer.innerHTML = '';
-                const cleanOrigin = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
 
-                data.forEach((emp, index) => {
+                allEmployees.forEach((emp, index) => {
                     const card = document.createElement('div');
                     card.className = 'emp-card';
 
-                    const targetUrl = `${cleanOrigin}index.html?store=${encodeURIComponent(emp.store_name || emp.store || '')}&emp=${encodeURIComponent(emp.emp_name || emp.name || '')}&company=${encodeURIComponent(emp.company_name || 'تزين')}&photo=${encodeURIComponent(emp.photo_url || emp.photo || '')}`;
+                    const targetUrl = reviewLink(emp);
+                    const photo = emp.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+                    const inactive = emp.active === false;
 
                     card.innerHTML = `
-                        <img src="${emp.photo_url || emp.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" alt="صورة الموظف">
-                        <h3>${emp.emp_name || emp.name}</h3>
-                        <p>الفرع: ${emp.store_name || emp.store}</p>
+                        <img src="${esc(photo)}" alt="صورة الموظف">
+                        <h3>${esc(emp.emp_name)}${inactive ? ' <span class="badge" style="background:#fee2e2;color:#991b1b;">منتهية الخدمة</span>' : ''}</h3>
+                        <p>${esc(emp.job_title || 'موظف')} — الفرع: ${esc(emp.store_name)}</p>
                         <div class="qrcode-container">
                             <canvas id="qrcode-${index}"></canvas>
-                            <span class="link-text">${targetUrl}</span>
+                            <span class="link-text">${esc(targetUrl)}</span>
+                        </div>
+                        <div class="emp-card-actions">
+                            <a class="action-btn" href="employee.html?id=${encodeURIComponent(emp.id)}">لوحة الموظف</a>
+                            <button class="action-btn" onclick="downloadQr(${index}, '${esc(emp.emp_name).replace(/'/g, '')}')">تحميل الباركود</button>
                         </div>
                     `;
                     listContainer.appendChild(card);
 
-                    setTimeout(() => {
-                        const canvasElement = document.getElementById(`qrcode-${index}`);
-                        if (canvasElement) {
-                            QRCode.toCanvas(canvasElement, targetUrl, { width: 140, margin: 1 }, function (error) {
-                                if (error) console.error(error);
-                            });
-                        }
-                    }, 100);
+                    const canvasElement = card.querySelector(`#qrcode-${index}`);
+                    QRCode.toCanvas(canvasElement, targetUrl, { width: 140, margin: 1 }, function (error) {
+                        if (error) console.error(error);
+                    });
                 });
 
             } catch (err) {
@@ -593,11 +720,36 @@
             }
         }
 
+        function downloadQr(index, name) {
+            const canvas = document.getElementById(`qrcode-${index}`);
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `باركود-${name}.png`;
+            link.click();
+        }
+
+        function populateBranchDatalist() {
+            const branches = [...new Set(allEmployees.map(e => e.store_name).filter(Boolean))].sort();
+            document.getElementById('branches-list').innerHTML =
+                branches.map(b => `<option value="${esc(b)}">`).join('');
+        }
+
+        function populateEmployeeFilter() {
+            const select = document.getElementById('filter-employee');
+            const keep = select.value;
+            select.innerHTML = '<option value="">جميع الموظفين</option>' +
+                allEmployees.map(e => `<option value="${esc(e.emp_name)}">${esc(e.emp_name)}</option>`).join('');
+            select.value = keep;
+        }
+
         async function addEmployee(event) {
             event.preventDefault();
 
             const name = document.getElementById('emp-name').value.trim();
             const store = document.getElementById('emp-store').value.trim();
+            const title = document.getElementById('emp-title').value.trim();
+            const hireDate = document.getElementById('emp-hire-date').value;
             const company = document.getElementById('company-name').value.trim();
             const photo = document.getElementById('emp-photo').value.trim();
             const saveBtn = document.getElementById('save-btn');
@@ -606,64 +758,92 @@
             saveBtn.innerText = 'جاري الحفظ...';
 
             try {
-                const { error } = await supabaseClient
+                const { data: emp, error } = await supabaseClient
                     .from('employees')
-                    .insert([
-                        {
-                            emp_name: name,
-                            store_name: store,
-                            company_name: company,
-                            photo_url: photo
-                        }
-                    ]);
+                    .insert([{
+                        client_id: currentClient.id,
+                        emp_name: name,
+                        store_name: store,
+                        company_name: company,
+                        job_title: title || null,
+                        hire_date: hireDate,
+                        photo_url: photo || null,
+                        active: true
+                    }])
+                    .select()
+                    .single();
 
                 if (error) throw error;
 
+                // أول سجل في تاريخ الفروع: الفرع الذي باشر فيه
+                const { error: assignError } = await supabaseClient
+                    .from('employee_assignments')
+                    .insert([{
+                        employee_id: emp.id,
+                        client_id: currentClient.id,
+                        branch: store,
+                        start_date: hireDate,
+                        note: 'المباشرة'
+                    }]);
+
+                if (assignError) console.error(assignError);
+
                 alert('تمت إضافة الموظف بنجاح وتوليد باركود التقييم!');
                 document.getElementById('add-employee-form').reset();
+                document.getElementById('company-name').value = currentClient.company_name || '';
                 fetchEmployees();
 
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء حفظ الموظف.');
+                alert('حدث خطأ أثناء حفظ الموظف: ' + (err.message || ''));
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerText = 'حفظ الموظف وتوليد الباركود';
             }
         }
 
-        // جلب وعرض التقييمات والإحصائيات
+        function exportEmployees() {
+            if (!allEmployees.length) return alert('لا يوجد موظفون للتصدير.');
+            const rows = [['اسم الموظف', 'المسمى الوظيفي', 'الفرع الحالي', 'تاريخ المباشرة', 'الحالة', 'رابط التقييم']];
+            allEmployees.forEach(e => rows.push([
+                e.emp_name, e.job_title || '', e.store_name, e.hire_date || '',
+                e.active === false ? 'منتهية الخدمة' : 'على رأس العمل', reviewLink(e)
+            ]));
+            downloadCsv(`الموظفون-${new Date().toISOString().slice(0,10)}.csv`, rows);
+        }
+
+        // ===== جلب التقييمات والإحصائيات =====
         async function fetchReviews() {
             try {
                 const { data, error } = await supabaseClient
-                    .from('reviews')
+                    .from('evaluations')
                     .select('*')
+                    .eq('client_id', currentClient.id)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
                 allReviews = data || [];
                 populateBranches(allReviews);
-                updateStats(allReviews);
-                renderTable(allReviews);
+                filterTable();
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('reviews-table-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">حدث خطأ أثناء جلب التقييمات.</td></tr>`;
+                document.getElementById('reviews-table-body').innerHTML =
+                    `<tr><td colspan="7" style="text-align: center; color: #ef4444;">حدث خطأ أثناء جلب التقييمات.</td></tr>`;
             }
         }
 
         function populateBranches(data) {
             const branchSelect = document.getElementById('filter-branch');
-            const branches = [...new Set(data.map(item => item.store_name || item.store).filter(Boolean))];
-            
-            branchSelect.innerHTML = '<option value="">جميع الفروع</option>';
-            branches.forEach(branch => {
-                const option = document.createElement('option');
-                option.value = branch;
-                option.textContent = branch;
-                branchSelect.appendChild(option);
-            });
+            const fromReviews = data.map(item => item.store_id);
+            const fromEmployees = allEmployees.map(e => e.store_name);
+            const branches = [...new Set([...fromReviews, ...fromEmployees].filter(Boolean))].sort();
+
+            const keep = branchSelect.value;
+            branchSelect.innerHTML = '<option value="">جميع الفروع</option>' +
+                branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+            branchSelect.value = keep;
         }
 
         function updateStats(data) {
@@ -676,66 +856,88 @@
                 return;
             }
 
-            const sum = data.reduce((acc, curr) => acc + (Number(curr.rating_value) || 3), 0);
+            const sum = data.reduce((acc, curr) => acc + (Number(curr.rating_value) || 0), 0);
             const avg = (sum / total).toFixed(1);
             document.getElementById('avg-rating').textContent = `5 / ${avg}`;
 
-            const positiveCount = data.filter(item => ['ممتاز', 'جيد جداً', '5', '4'].includes(String(item.rating))).length;
-            const satisfaction = Math.round((positiveCount / total) * 100);
-            document.getElementById('satisfaction-rate').textContent = `${satisfaction}%`;
+            const positiveCount = data.filter(item => Number(item.rating_value) >= 4).length;
+            document.getElementById('satisfaction-rate').textContent =
+                `${Math.round((positiveCount / total) * 100)}%`;
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('reviews-table-body');
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b;">لا توجد تقييمات مطابقة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">لا توجد تقييمات مطابقة.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = '';
-            data.forEach(item => {
-                const tr = document.createElement('tr');
-                
-                let emoji = '😐';
-                if (['ممتاز', 'جيد جداً'].includes(item.rating)) emoji = '😊';
-                if (['سيء', 'سيء جداً'].includes(item.rating)) emoji = '😞';
+            tbody.innerHTML = data.map(item => {
+                const value = Number(item.rating_value) || 0;
+                return `
+                    <tr>
+                        <td><strong>${ratingEmoji(value)} ${esc(ratingLabel(value))}</strong></td>
+                        <td>${esc(item.customer_name || 'غير مسجل')}</td>
+                        <td style="direction: ltr; text-align: right;">${esc(item.customer_mobile || 'غير مسجل')}</td>
+                        <td>${esc(item.comment || 'بدون تعليق')}</td>
+                        <td><span class="badge">${esc(item.emp_id || 'غير محدد')}</span></td>
+                        <td>${esc(item.store_id || 'غير محدد')}</td>
+                        <td style="direction: ltr; text-align: right;">${fmtDateTime(item.created_at)}</td>
+                    </tr>`;
+            }).join('');
+        }
 
-                tr.innerHTML = `
-                    <td><strong>${emoji} ${item.rating || 'متوسط'}</strong></td>
-                    <td>${item.client_name || item.customer_name || 'غير مسجل'}</td>
-                    <td>${item.client_phone || item.phone || 'غير مسجل'}</td>
-                    <td>${item.comment || 'بدون تعليق'}</td>
-                    <td><span class="badge">معرف: ${item.emp_name || item.employee || 'غير محدد'}</span></td>
-                    <td style="direction: ltr; text-align: right;">${item.created_at ? new Date(item.created_at).toLocaleString('ar-SA') : 'رقمي'}</td>
-                `;
-                tbody.appendChild(tr);
+        function getFiltered() {
+            const branchFilter = document.getElementById('filter-branch').value;
+            const searchFilter = document.getElementById('search-input').value.trim().toLowerCase();
+            const ratingFilter = document.getElementById('filter-rating').value;
+            const employeeFilter = document.getElementById('filter-employee').value;
+            const periodDays = document.getElementById('filter-period').value;
+            const since = periodDays ? Date.now() - Number(periodDays) * 86400000 : null;
+
+            return allReviews.filter(item => {
+                const value = Number(item.rating_value) || 0;
+
+                if (branchFilter && item.store_id !== branchFilter) return false;
+                if (employeeFilter && item.emp_id !== employeeFilter) return false;
+                if (ratingFilter === 'low' && value > 4) return false;
+                if (ratingFilter && ratingFilter !== 'low' && value !== Number(ratingFilter)) return false;
+                if (since && new Date(item.created_at).getTime() < since) return false;
+
+                if (searchFilter) {
+                    const haystack = [item.customer_name, item.customer_mobile, item.comment, item.emp_id]
+                        .filter(Boolean).join(' ').toLowerCase();
+                    if (!haystack.includes(searchFilter)) return false;
+                }
+                return true;
             });
         }
 
         function filterTable() {
-            const branchFilter = document.getElementById('filter-branch').value;
-            const searchFilter = document.getElementById('search-input').value.toLowerCase();
-            const ratingFilter = document.getElementById('filter-rating').value;
-
-            const filtered = allReviews.filter(item => {
-                const branch = item.store_name || item.store || '';
-                const name = (item.client_name || item.customer_name || '').toLowerCase();
-                const phone = (item.client_phone || item.phone || '').toLowerCase();
-                const comment = (item.comment || '').toLowerCase();
-                const rating = item.rating || '';
-
-                const matchesBranch = !branchFilter || branch === branchFilter;
-                const matchesRating = !ratingFilter || rating === ratingFilter;
-                const matchesSearch = !searchFilter || name.includes(searchFilter) || phone.includes(searchFilter) || comment.includes(searchFilter);
-
-                return matchesBranch && matchesRating && matchesSearch;
-            });
-
+            const filtered = getFiltered();
             renderTable(filtered);
             updateStats(filtered);
         }
 
-        function logout() {
+        function exportReviews() {
+            const data = getFiltered();
+            if (!data.length) return alert('لا توجد تقييمات للتصدير.');
+
+            const rows = [['التاريخ والوقت', 'التقييم', 'القيمة', 'اسم العميل', 'رقم الجوال', 'الموظف', 'الفرع', 'التعليق']];
+            data.forEach(item => {
+                const value = Number(item.rating_value) || 0;
+                rows.push([
+                    fmtDateTime(item.created_at), ratingLabel(value), value,
+                    item.customer_name || '', item.customer_mobile || '',
+                    item.emp_id || '', item.store_id || '', item.comment || ''
+                ]);
+            });
+            downloadCsv(`التقييمات-${new Date().toISOString().slice(0,10)}.csv`, rows);
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            localStorage.removeItem('client_id');
             window.location.href = 'login.html';
         }
     </script>

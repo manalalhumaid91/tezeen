@@ -250,6 +250,14 @@
             color: var(--primary-color);
             font-weight: 700;
         }
+
+        .error-msg {
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -266,6 +274,8 @@
         <p class="emp-subtitle" id="emp-store-title">الفرع</p>
 
         <form id="evaluation-form" onsubmit="submitEvaluation(event)">
+            <p class="error-msg" id="errorMsg"></p>
+
             <div class="rating-container">
                 <button type="button" class="rating-btn" onclick="setRating(5, '😁 ممتاز', this)" title="ممتاز">😁</button>
                 <button type="button" class="rating-btn" onclick="setRating(4, '🙂 جيد', this)" title="جيد">🙂</button>
@@ -285,7 +295,7 @@
             </div>
 
             <div class="form-group">
-                <label for="customer-comment">ملاحظاتك أو اقتراحاتك</label>
+                <label for="customer-comment" id="comment-label">ملاحظاتك أو اقتراحاتك</label>
                 <textarea id="customer-comment" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
             </div>
 
@@ -320,47 +330,85 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const urlParams = new URLSearchParams(window.location.search);
-        const storeName = urlParams.get('store') || 'الفرع الرئيسي';
-        const empName = urlParams.get('emp') || 'موظف الخدمة';
-        const clientEmail = urlParams.get('client') || '';
-        const companyName = urlParams.get('company') || 'اسم المركز';
-        const urlPhoto = urlParams.get('photo');
 
-        document.getElementById('store-brand-name').innerText = companyName;
-        document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${empName}`;
-        document.getElementById('emp-store-title').innerText = `الفرع: ${storeName}`;
+        // الباركود يحمل معرّف الموظف، والبيانات تُجلب من قاعدة البيانات.
+        // الباقي يبقى كخطة بديلة لروابط قديمة أو مشاركة مباشرة.
+        const employeeId = urlParams.get('id');
 
-        // معالجة صورة الموظف بأمان
-        if (urlPhoto) {
-            try {
-                document.getElementById('emp-avatar-img').src = decodeURIComponent(urlPhoto);
-            } catch(e) {
-                console.log('خطأ في تحميل الصورة من الرابط');
+        let employee = {
+            id: employeeId,
+            emp_name: urlParams.get('emp') || 'موظف الخدمة',
+            store_name: urlParams.get('store') || 'الفرع الرئيسي',
+            company_name: urlParams.get('company') || 'اسم المركز',
+            photo_url: urlParams.get('photo') || '',
+            job_title: '',
+            client_id: null
+        };
+
+        function paintEmployee() {
+            document.getElementById('store-brand-name').innerText = employee.company_name || 'اسم المركز';
+            document.getElementById('emp-name-title').innerText = `تزين الخدمة مع ${employee.emp_name}`;
+            document.getElementById('emp-store-title').innerText =
+                (employee.job_title ? employee.job_title + ' — ' : '') + `الفرع: ${employee.store_name}`;
+
+            if (employee.photo_url) {
+                const img = document.getElementById('emp-avatar-img');
+                try { img.src = decodeURIComponent(employee.photo_url); }
+                catch (e) { img.src = employee.photo_url; }
             }
         }
 
-        let selectedRatingValue = 5;
-        let selectedRatingText = '😁 ممتاز';
+        async function loadEmployee() {
+            paintEmployee();
+            if (!employeeId) return;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const defaultBtn = document.querySelector('.rating-btn');
-            if(defaultBtn) defaultBtn.classList.add('selected');
-        });
+            try {
+                const { data, error } = await supabaseClient
+                    .rpc('employee_public', { p_id: employeeId });
+
+                if (error) throw error;
+                const row = Array.isArray(data) ? data[0] : data;
+                if (row) {
+                    employee = { ...employee, ...row };
+                    paintEmployee();
+                }
+            } catch (err) {
+                console.error('تعذّر جلب بيانات الموظف', err);
+            }
+        }
+
+        let selectedRatingValue = null;
+        let selectedRatingText = '';
 
         function setRating(val, text, btnElement) {
             selectedRatingValue = val;
             selectedRatingText = text;
-            
-            document.querySelectorAll('.rating-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            if (btnElement) {
-                btnElement.classList.add('selected');
-            }
+
+            document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+            if (btnElement) btnElement.classList.add('selected');
+
+            document.getElementById('errorMsg').style.display = 'none';
+
+            // التقييم المنخفض يستحق سؤالاً مختلفاً
+            document.getElementById('comment-label').innerText = val <= 3
+                ? 'وش الشيء اللي نقدر نحسّنه؟'
+                : 'ملاحظاتك أو اقتراحاتك';
+        }
+
+        function showError(text) {
+            const box = document.getElementById('errorMsg');
+            box.innerText = text;
+            box.style.display = 'block';
         }
 
         async function submitEvaluation(event) {
             event.preventDefault();
+
+            // لا تقييم افتراضي: العميل لازم يختار بنفسه
+            if (!selectedRatingValue) {
+                showError('الرجاء اختيار تقييمك أولاً');
+                return;
+            }
 
             const customerName = document.getElementById('customer-name').value.trim();
             const customerMobile = document.getElementById('customer-mobile').value.trim();
@@ -375,10 +423,12 @@
                     .from('evaluations')
                     .insert([
                         {
-                            client_email: clientEmail,
-                            store_id: storeName,
-                            emp_id: empName,
+                            client_id: employee.client_id,
+                            employee_id: employee.id || null,
+                            store_id: employee.store_name,
+                            emp_id: employee.emp_name,
                             rating: selectedRatingText,
+                            rating_value: selectedRatingValue,
                             customer_name: customerName || 'زائر كريم',
                             customer_mobile: customerMobile || null,
                             comment: customerComment || null
@@ -396,11 +446,13 @@
 
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء إرسال التقييم، يرجى المحاولة لاحقاً.');
+                showError('حدث خطأ أثناء إرسال التقييم، يرجى المحاولة لاحقاً.');
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'إرسال التقييم';
             }
         }
+
+        loadEmployee();
     </script>
 </body>
 </html>

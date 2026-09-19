@@ -130,12 +130,12 @@
 
         <div class="form-group">
             <label for="client-email">البريد الإلكتروني للشركة</label>
-            <input type="email" id="client-email" placeholder="name@company.com">
+            <input type="email" id="client-email" placeholder="name@company.com" autocomplete="username">
         </div>
 
         <div class="form-group">
             <label for="client-password">كلمة المرور</label>
-            <input type="password" id="client-password" placeholder="••••••••">
+            <input type="password" id="client-password" placeholder="••••••••" autocomplete="current-password">
         </div>
 
         <button class="login-btn" id="loginBtn" onclick="handleLogin()">تسجيل الدخول</button>
@@ -147,15 +147,30 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // الإرسال بزر Enter
+        document.querySelectorAll('#client-email, #client-password').forEach(el => {
+            el.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+        });
+
+        // لو الجلسة شغّالة، ننتقل مباشرة للوحة التحكم
+        supabaseClient.auth.getSession().then(({ data }) => {
+            if (data.session) window.location.replace('dashboard.html');
+        });
+
+        function showError(text) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.innerText = text;
+            errorMsg.style.display = 'block';
+        }
+
         async function handleLogin() {
             const email = document.getElementById('client-email').value.trim();
-            const password = document.getElementById('client-password').value.trim();
+            const password = document.getElementById('client-password').value;
             const errorMsg = document.getElementById('errorMsg');
             const loginBtn = document.getElementById('loginBtn');
 
             if (!email || !password) {
-                errorMsg.innerText = 'الرجاء إدخال البريد وكلمة المرور!';
-                errorMsg.style.display = 'block';
+                showError('الرجاء إدخال البريد وكلمة المرور!');
                 return;
             }
 
@@ -164,30 +179,32 @@
             errorMsg.style.display = 'none';
 
             try {
-                // البحث عن الشركة في جدول clients بناءً على البريد وكلمة المرور
-                const { data, error } = await supabaseClient
-                    .from('clients')
-                    .select('*')
-                    .eq('email', email)
-                    .eq('password', password)
-                    .single();
+                // المصادقة عبر Supabase Auth (كلمات المرور مشفّرة في الخادم)
+                const { error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (authError) throw new Error('بيانات الدخول غير مطابقة');
 
-                if (error || !data) {
-                    throw new Error('بيانات الدخول غير مطابقة');
+                // جلب سجل الشركة المرتبط بهذا الحساب
+                const { data: client, error: clientError } = await supabaseClient
+                    .from('clients')
+                    .select('id, company_name, logo_url, email')
+                    .maybeSingle();
+
+                if (clientError || !client) {
+                    await supabaseClient.auth.signOut();
+                    throw new Error('الحساب غير مرتبط بشركة مشتركة. تواصل مع إدارة المنصة.');
                 }
 
-                // حفظ بيانات الشركة المشتركة في الذاكرة المحلية للجلسة مع البريد لضمان الفلترة الدقيقة
-                localStorage.setItem('client_name', data.company_name);
-                localStorage.setItem('client_logo', data.logo_url || '');
-                localStorage.setItem('client_email', data.email);
+                // بيانات الجلسة التي تقرأها لوحة التحكم
+                localStorage.setItem('client_id', client.id);
+                localStorage.setItem('client_email', client.email || email);
+                localStorage.setItem('center_name', client.company_name || '');
+                localStorage.setItem('center_logo', client.logo_url || '');
 
-                // الانتقال للوحة التحكم الخاصة بالعميل
                 window.location.href = 'dashboard.html';
 
             } catch (err) {
                 console.error(err);
-                errorMsg.innerText = 'البريد الإلكتروني أو كلمة المرور غير صحيحة!';
-                errorMsg.style.display = 'block';
+                showError(err.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة!');
                 loginBtn.innerText = 'تسجيل الدخول';
                 loginBtn.disabled = false;
             }
