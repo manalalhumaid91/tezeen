@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - إدارة التقييمات والموظفين</title>
+    <!-- مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- مكتبة توليد الباركود QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* الترويسة العلوية: الشعار والاسم يمين، والإعدادات وتسجيل الخروج يسار */
+        .dashboard-header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-logo {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+        }
+
+        .brand-info h1 {
+            font-size: 18px;
+            color: #1e3a8a;
+            margin: 0 0 4px 0;
+            font-weight: 700;
+        }
+
+        .brand-info p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* الأزرار التي تعمل كروابط تأخذ نفس شكل .action-btn */
+        a.action-btn {
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .logout-btn {
+            background: #fee2e2;
+            color: #991b1b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .logout-btn:hover {
+            background: #fecaca;
+        }
+
+        /* البطاقات والنماذج */
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .card h2 {
+            font-size: 16px;
+            color: #1e3a8a;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            border-color: #1e3a8a;
+            background: #fff;
+        }
+
+        .btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .btn:hover {
+            background: #1e40af;
+        }
+
+        /* شبكة الموظفين والباركودات */
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .emp-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        .emp-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid #f0f6ff;
+        }
+
+        .emp-card h3 {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .emp-card p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0 0 15px 0;
+        }
+
+        .emp-card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .qrcode-container {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qrcode-container canvas {
+            max-width: 140px;
+            height: auto !important;
+        }
+
+        .link-text {
+            font-size: 11px;
+            color: #3b82f6;
+            word-break: break-all;
+            background: #eff6ff;
+            padding: 6px;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* إحصائيات علوية لوحة التقييمات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 15px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        /* شريط الفلاتر والبحث */
+        .filter-bar {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            outline: none;
+            background: #fafafa;
+        }
+
+        .filter-bar input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-bar select {
+            min-width: 180px;
+        }
+
+        /* جدول التقييمات */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 13px;
+            padding: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px;
+            font-size: 13px;
+            color: #1e293b;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .badge {
+            background: #eff6ff;
+            color: #1e3a8a;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* نافذة الإعدادات المنبثقة */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. الترويسة العلوية: الشعار واسم المركز يمين، الإعدادات وتسجيل الخروج يسار -->
+        <header class="dashboard-header">
+            <div class="brand-section">
+                <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150" alt="شعار المركز" class="brand-logo" id="header-logo">
+                <div class="brand-info">
+                    <h1 id="header-center-name">مركز تزين للجمال</h1>
+                    <p>لوحة التحكم والإدارة</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" onclick="openSettings()">الإعدادات</button>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </header>
+
+        <!-- 2. قسم إضافة موظف وتوليد الباركود -->
+        <div class="card">
+            <h2>إضافة موظف جديد وتوليد باركود التقييم</h2>
+            <form id="add-employee-form" onsubmit="addEmployee(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="emp-name">اسم الموظف</label>
+                        <input type="text" id="emp-name" placeholder="مثال: سارة أحمد" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emp-store">اسم الفرع</label>
+                        <input type="text" id="emp-store" placeholder="مثال: فرع الرياض" required list="branches-list">
+                        <datalist id="branches-list"></datalist>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="emp-title">المسمى الوظيفي</label>
+                        <input type="text" id="emp-title" placeholder="مثال: مضيف صالة">
+                    </div>
+                    <div class="form-group">
+                        <label for="emp-hire-date">تاريخ المباشرة</label>
+                        <input type="date" id="emp-hire-date" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="company-name">اسم المركز / الشركة</label>
+                        <input type="text" id="company-name" placeholder="مثال: مركز تزين للجمال" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emp-photo-file">صورة الموظف</label>
+                        <input type="file" id="emp-photo-file" accept="image/jpeg,image/png,image/webp" onchange="previewPhoto(this)">
+                        <p id="photo-hint" style="font-size:12px; color:#64748b; margin:6px 0 0 0; font-weight:600;">
+                            اختياري — JPG أو PNG أو WEBP، بحد أقصى 2 ميجابايت.
+                        </p>
+                        <img id="photo-preview" src="" alt="معاينة الصورة"
+                             style="display:none; width:70px; height:70px; border-radius:50%; object-fit:cover; border:3px solid #f0f6ff; margin-top:10px;">
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="save-btn">حفظ الموظف وتوليد الباركود</button>
+            </form>
+        </div>
+
+        <!-- قائمة الموظفين والباركودات النشطة -->
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin-bottom:0;">قائمة الموظفين والباركودات النشطة</h2>
+                <button class="action-btn" onclick="exportEmployees()">تصدير قائمة الموظفين</button>
+            </div>
+            <div id="employees-list" class="employees-grid">
+                <!-- تعبئة تلقائية -->
+            </div>
+        </div>
+
+        <!-- 3. لوحة تحكم التقييمات والإحصائيات -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>إجمالي التقييمات</h3>
+                <p class="value" id="total-reviews">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>متوسط التقييم العام</h3>
+                <p class="value" id="avg-rating">5 / 0.0</p>
+            </div>
+            <div class="stat-card">
+                <h3>الرضا العام</h3>
+                <p class="value" id="satisfaction-rate">0%</p>
+            </div>
+        </div>
+
+        <!-- شريط الفلاتر والبحث للتقييمات -->
+        <div class="filter-bar">
+            <select id="filter-branch" onchange="filterTable()">
+                <option value="">جميع الفروع</option>
+            </select>
+            <input type="text" id="search-input" placeholder="ابحث باسم العميل، رقم الجوال، أو التعليق..." oninput="filterTable()">
+            <select id="filter-employee" onchange="filterTable()">
+                <option value="">جميع الموظفين</option>
+            </select>
+            <select id="filter-rating" onchange="filterTable()">
+                <option value="">جميع التقييمات</option>
+                <option value="5">ممتاز</option>
+                <option value="4">جيد</option>
+                <option value="3">متوسط</option>
+                <option value="2">سيء</option>
+                <option value="1">سيء جداً</option>
+                <option value="low">جيد فأقل (يحتاج متابعة)</option>
+            </select>
+            <select id="filter-period" onchange="filterTable()">
+                <option value="">كل الفترات</option>
+                <option value="1">اليوم</option>
+                <option value="7">آخر 7 أيام</option>
+                <option value="30">آخر 30 يوم</option>
+                <option value="90">آخر 90 يوم</option>
+            </select>
+        </div>
+
+        <!-- جدول التقييمات الواردة -->
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin-bottom:0;">سجل التقييمات الواردة</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="action-btn" onclick="exportReviews()">تصدير Excel</button>
+                    <button class="btn" style="padding: 10px 18px; font-size: 13px;" onclick="fetchReviews()">تحديث البيانات</button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التقييم</th>
+                            <th>اسم العميل</th>
+                            <th>رقم الجوال</th>
+                            <th>التعليق</th>
+                            <th>الموظف</th>
+                            <th>الفرع</th>
+                            <th>الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviews-table-body">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #64748b;">جاري تحميل البيانات...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إعدادات الشعار والاسم -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h2>إعدادات المركز والشعار</h2>
+            <form onsubmit="saveSettings(event)">
+                <div class="form-group">
+                    <label for="setting-center-name">اسم المركز / الشركة</label>
+                    <input type="text" id="setting-center-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="setting-logo-url">رابط شعار المركز (Logo URL)</label>
+                    <input type="url" id="setting-logo-url" placeholder="https://...">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="action-btn" onclick="closeSettings()">إلغاء</button>
+                    <button type="submit" class="btn">حفظ الإعدادات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://tmiqnvzlnnvhjswkkdrk.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allReviews = [];
+        let allEmployees = [];
+        let currentClient = null;
+
+        // ===== بوابة الدخول: لا لوحة بلا جلسة =====
+        window.addEventListener('DOMContentLoaded', async () => {
+            const { data } = await supabaseClient.auth.getSession();
+            if (!data.session) { window.location.replace('login.html'); return; }
+
+            const { data: client } = await supabaseClient
+                .from('clients')
+                .select('id, company_name, logo_url, email')
+                .maybeSingle();
+
+            if (!client) {
+                alert('الحساب غير مرتبط بشركة مشتركة.');
+                await supabaseClient.auth.signOut();
+                window.location.replace('login.html');
+                return;
+            }
+
+            currentClient = client;
+            localStorage.setItem('client_id', client.id);
+            if (client.company_name) localStorage.setItem('center_name', client.company_name);
+            if (client.logo_url) localStorage.setItem('center_logo', client.logo_url);
+
+            loadHeaderSettings();
+            document.getElementById('company-name').value = client.company_name || '';
+            fetchEmployees();
+            fetchReviews();
+        });
+
+        // ===== إعدادات الهيدر (الشعار والاسم) =====
+        function loadHeaderSettings() {
+            const savedName = localStorage.getItem('center_name');
+            const savedLogo = localStorage.getItem('center_logo');
+
+            if (savedName) {
+                document.getElementById('header-center-name').textContent = savedName;
+                document.getElementById('setting-center-name').value = savedName;
+            }
+            if (savedLogo) {
+                document.getElementById('header-logo').src = savedLogo;
+                document.getElementById('setting-logo-url').value = savedLogo;
+            }
+        }
+
+        function openSettings() {
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        async function saveSettings(event) {
+            event.preventDefault();
+            const name = document.getElementById('setting-center-name').value.trim();
+            const logo = document.getElementById('setting-logo-url').value.trim();
+
+            localStorage.setItem('center_name', name);
+            localStorage.setItem('center_logo', logo);
+
+            // الحفظ في قاعدة البيانات أيضاً ليظهر على أي جهاز يدخل منه المشترك
+            if (currentClient) {
+                const { error } = await supabaseClient
+                    .from('clients')
+                    .update({ company_name: name, logo_url: logo })
+                    .eq('id', currentClient.id);
+                if (error) console.error(error);
+                else currentClient.company_name = name;
+            }
+
+            loadHeaderSettings();
+            closeSettings();
+            alert('تم حفظ إعدادات المركز والشعار بنجاح!');
+        }
+
+        // ===== أدوات مشتركة =====
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+        }
+
+        function fmtDateTime(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            const p = n => String(n).padStart(2, '0');
+            return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} - ${p(d.getHours())}:${p(d.getMinutes())}`;
+        }
+
+        function ratingEmoji(value) {
+            return { 5: '😁', 4: '🙂', 3: '😐', 2: '🙁', 1: '😡' }[value] || '😐';
+        }
+
+        function ratingLabel(value) {
+            return { 5: 'ممتاز', 4: 'جيد', 3: 'متوسط', 2: 'سيء', 1: 'سيء جداً' }[value] || 'غير محدد';
+        }
+
+        function downloadCsv(filename, rows) {
+            const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const csv = '\uFEFF' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function reviewLink(emp) {
+            const cleanOrigin = window.location.origin +
+                window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            return `${cleanOrigin}index.html?id=${encodeURIComponent(emp.id)}`;
+        }
+
+        // ===== جلب الموظفين وتوليد الباركودات =====
+        async function fetchEmployees() {
+            const listContainer = document.getElementById('employees-list');
+            listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">جاري تحميل الموظفين...</p>';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('employees')
+                    .select('*')
+                    .eq('client_id', currentClient.id)
+                    .order('emp_name');
+
+                if (error) throw error;
+
+                allEmployees = data || [];
+                populateEmployeeFilter();
+                populateBranchDatalist();
+
+                if (!allEmployees.length) {
+                    listContainer.innerHTML = '<p style="text-align:center; color:#64748b; grid-column: 1/-1;">لا توجد بيانات موظفين مسجلة حالياً. أضف أول موظف من النموذج بالأعلى.</p>';
+                    return;
+                }
+
+                listContainer.innerHTML = '';
+
+                allEmployees.forEach((emp, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'emp-card';
+
+                    const targetUrl = reviewLink(emp);
+                    const photo = emp.photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+                    const inactive = emp.active === false;
+
+                    card.innerHTML = `
+                        <img src="${esc(photo)}" alt="صورة الموظف">
+                        <h3>${esc(emp.emp_name)}${inactive ? ' <span class="badge" style="background:#fee2e2;color:#991b1b;">منتهية الخدمة</span>' : ''}</h3>
+                        <p>${esc(emp.job_title || 'موظف')} — الفرع: ${esc(emp.store_name)}</p>
+                        <div class="qrcode-container">
+                            <canvas id="qrcode-${index}"></canvas>
+                            <span class="link-text">${esc(targetUrl)}</span>
+                        </div>
+                        <div class="emp-card-actions">
+                            <a class="action-btn" href="employee.html?id=${encodeURIComponent(emp.id)}">لوحة الموظف</a>
+                            <button class="action-btn" onclick="downloadQr(${index}, '${esc(emp.emp_name).replace(/'/g, '')}')">تحميل الباركود</button>
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+
+                    const canvasElement = card.querySelector(`#qrcode-${index}`);
+                    QRCode.toCanvas(canvasElement, targetUrl, { width: 140, margin: 1 }, function (error) {
+                        if (error) console.error(error);
+                    });
+                });
+
+            } catch (err) {
+                console.error(err);
+                listContainer.innerHTML = '<p style="text-align:center; color:#ef4444; grid-column: 1/-1;">حدث خطأ أثناء جلب الموظفين.</p>';
+            }
+        }
+
+        function downloadQr(index, name) {
+            const canvas = document.getElementById(`qrcode-${index}`);
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `باركود-${name}.png`;
+            link.click();
+        }
+
+        function populateBranchDatalist() {
+            const branches = [...new Set(allEmployees.map(e => e.store_name).filter(Boolean))].sort();
+            document.getElementById('branches-list').innerHTML =
+                branches.map(b => `<option value="${esc(b)}">`).join('');
+        }
+
+        function populateEmployeeFilter() {
+            const select = document.getElementById('filter-employee');
+            const keep = select.value;
+            select.innerHTML = '<option value="">جميع الموظفين</option>' +
+                allEmployees.map(e => `<option value="${esc(e.emp_name)}">${esc(e.emp_name)}</option>`).join('');
+            select.value = keep;
+        }
+
+        // ===== رفع صورة الموظف إلى مساحة التخزين =====
+        const PHOTO_BUCKET = 'tazeen-storage';
+        const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
+
+        function previewPhoto(input) {
+            const preview = document.getElementById('photo-preview');
+            const file = input.files && input.files[0];
+
+            if (!file) { preview.style.display = 'none'; return; }
+
+            if (file.size > MAX_PHOTO_BYTES) {
+                alert('حجم الصورة أكبر من 2 ميجابايت. اختاري صورة أصغر أو اضغطيها أولاً.');
+                input.value = '';
+                preview.style.display = 'none';
+                return;
+            }
+
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+        }
+
+        async function uploadPhoto(file) {
+            const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+            const path = `${currentClient.id}/${unique}.${ext}`;
+
+            const { error } = await supabaseClient.storage
+                .from(PHOTO_BUCKET)
+                .upload(path, file, { cacheControl: '3600', upsert: false });
+
+            if (error) throw new Error('تعذّر رفع الصورة: ' + error.message);
+
+            const { data } = supabaseClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+            return data.publicUrl;
+        }
+
+        async function addEmployee(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('emp-name').value.trim();
+            const store = document.getElementById('emp-store').value.trim();
+            const title = document.getElementById('emp-title').value.trim();
+            const hireDate = document.getElementById('emp-hire-date').value;
+            const company = document.getElementById('company-name').value.trim();
+            const fileInput = document.getElementById('emp-photo-file');
+            const saveBtn = document.getElementById('save-btn');
+
+            saveBtn.disabled = true;
+            saveBtn.innerText = 'جاري الحفظ...';
+
+            try {
+                let photo = null;
+                if (fileInput.files && fileInput.files[0]) {
+                    saveBtn.innerText = 'جاري رفع الصورة...';
+                    photo = await uploadPhoto(fileInput.files[0]);
+                    saveBtn.innerText = 'جاري الحفظ...';
+                }
+
+                const { data: emp, error } = await supabaseClient
+                    .from('employees')
+                    .insert([{
+                        client_id: currentClient.id,
+                        emp_name: name,
+                        store_name: store,
+                        company_name: company,
+                        job_title: title || null,
+                        hire_date: hireDate,
+                        photo_url: photo || null,
+                        active: true
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // أول سجل في تاريخ الفروع: الفرع الذي باشر فيه
+                const { error: assignError } = await supabaseClient
+                    .from('employee_assignments')
+                    .insert([{
+                        employee_id: emp.id,
+                        client_id: currentClient.id,
+                        branch: store,
+                        start_date: hireDate,
+                        note: 'المباشرة'
+                    }]);
+
+                if (assignError) console.error(assignError);
+
+                alert('تمت إضافة الموظف بنجاح وتوليد باركود التقييم!');
+                document.getElementById('add-employee-form').reset();
+                document.getElementById('photo-preview').style.display = 'none';
+                document.getElementById('company-name').value = currentClient.company_name || '';
+                fetchEmployees();
+
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء حفظ الموظف: ' + (err.message || ''));
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = 'حفظ الموظف وتوليد الباركود';
+            }
+        }
+
+        function exportEmployees() {
+            if (!allEmployees.length) return alert('لا يوجد موظفون للتصدير.');
+            const rows = [['اسم الموظف', 'المسمى الوظيفي', 'الفرع الحالي', 'تاريخ المباشرة', 'الحالة', 'رابط التقييم']];
+            allEmployees.forEach(e => rows.push([
+                e.emp_name, e.job_title || '', e.store_name, e.hire_date || '',
+                e.active === false ? 'منتهية الخدمة' : 'على رأس العمل', reviewLink(e)
+            ]));
+            downloadCsv(`الموظفون-${new Date().toISOString().slice(0,10)}.csv`, rows);
+        }
+
+        // ===== جلب التقييمات والإحصائيات =====
+        async function fetchReviews() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('evaluations')
+                    .select('*')
+                    .eq('client_id', currentClient.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allReviews = data || [];
+                populateBranches(allReviews);
+                filterTable();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('reviews-table-body').innerHTML =
+                    `<tr><td colspan="7" style="text-align: center; color: #ef4444;">حدث خطأ أثناء جلب التقييمات.</td></tr>`;
+            }
+        }
+
+        function populateBranches(data) {
+            const branchSelect = document.getElementById('filter-branch');
+            const fromReviews = data.map(item => item.store_id);
+            const fromEmployees = allEmployees.map(e => e.store_name);
+            const branches = [...new Set([...fromReviews, ...fromEmployees].filter(Boolean))].sort();
+
+            const keep = branchSelect.value;
+            branchSelect.innerHTML = '<option value="">جميع الفروع</option>' +
+                branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+            branchSelect.value = keep;
+        }
+
+        function updateStats(data) {
+            const total = data.length;
+            document.getElementById('total-reviews').textContent = total;
+
+            if (total === 0) {
+                document.getElementById('avg-rating').textContent = '5 / 0.0';
+                document.getElementById('satisfaction-rate').textContent = '0%';
+                return;
+            }
+
+            const sum = data.reduce((acc, curr) => acc + (Number(curr.rating_value) || 0), 0);
+            const avg = (sum / total).toFixed(1);
+            document.getElementById('avg-rating').textContent = `5 / ${avg}`;
+
+            const positiveCount = data.filter(item => Number(item.rating_value) >= 4).length;
+            document.getElementById('satisfaction-rate').textContent =
+                `${Math.round((positiveCount / total) * 100)}%`;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('reviews-table-body');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">لا توجد تقييمات مطابقة.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const value = Number(item.rating_value) || 0;
+                return `
+                    <tr>
+                        <td><strong>${ratingEmoji(value)} ${esc(ratingLabel(value))}</strong></td>
+                        <td>${esc(item.customer_name || 'غير مسجل')}</td>
+                        <td style="direction: ltr; text-align: right;">${esc(item.customer_mobile || 'غير مسجل')}</td>
+                        <td>${esc(item.comment || 'بدون تعليق')}</td>
+                        <td><span class="badge">${esc(item.emp_id || 'غير محدد')}</span></td>
+                        <td>${esc(item.store_id || 'غير محدد')}</td>
+                        <td style="direction: ltr; text-align: right;">${fmtDateTime(item.created_at)}</td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function getFiltered() {
+            const branchFilter = document.getElementById('filter-branch').value;
+            const searchFilter = document.getElementById('search-input').value.trim().toLowerCase();
+            const ratingFilter = document.getElementById('filter-rating').value;
+            const employeeFilter = document.getElementById('filter-employee').value;
+            const periodDays = document.getElementById('filter-period').value;
+            const since = periodDays ? Date.now() - Number(periodDays) * 86400000 : null;
+
+            return allReviews.filter(item => {
+                const value = Number(item.rating_value) || 0;
+
+                if (branchFilter && item.store_id !== branchFilter) return false;
+                if (employeeFilter && item.emp_id !== employeeFilter) return false;
+                if (ratingFilter === 'low' && value > 4) return false;
+                if (ratingFilter && ratingFilter !== 'low' && value !== Number(ratingFilter)) return false;
+                if (since && new Date(item.created_at).getTime() < since) return false;
+
+                if (searchFilter) {
+                    const haystack = [item.customer_name, item.customer_mobile, item.comment, item.emp_id]
+                        .filter(Boolean).join(' ').toLowerCase();
+                    if (!haystack.includes(searchFilter)) return false;
+                }
+                return true;
+            });
+        }
+
+        function filterTable() {
+            const filtered = getFiltered();
+            renderTable(filtered);
+            updateStats(filtered);
+        }
+
+        function exportReviews() {
+            const data = getFiltered();
+            if (!data.length) return alert('لا توجد تقييمات للتصدير.');
+
+            const rows = [['التاريخ والوقت', 'التقييم', 'القيمة', 'اسم العميل', 'رقم الجوال', 'الموظف', 'الفرع', 'التعليق']];
+            data.forEach(item => {
+                const value = Number(item.rating_value) || 0;
+                rows.push([
+                    fmtDateTime(item.created_at), ratingLabel(value), value,
+                    item.customer_name || '', item.customer_mobile || '',
+                    item.emp_id || '', item.store_id || '', item.comment || ''
+                ]);
+            });
+            downloadCsv(`التقييمات-${new Date().toISOString().slice(0,10)}.csv`, rows);
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            localStorage.removeItem('client_id');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
