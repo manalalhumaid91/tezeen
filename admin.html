@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المشتركين - منصة تزين</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .dashboard-header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand-section { display: flex; align-items: center; gap: 15px; }
+
+        .logo-badge {
+            width: 55px; height: 55px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 700;
+        }
+
+        .brand-info h1 { font-size: 18px; color: #1e3a8a; margin: 0 0 4px 0; font-weight: 700; }
+        .brand-info p { font-size: 13px; color: #64748b; margin: 0; }
+
+        .header-actions { display: flex; gap: 10px; }
+
+        .action-btn {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .action-btn:hover { background: #e2e8f0; }
+        a.action-btn { text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
+
+        .logout-btn {
+            background: #fee2e2; color: #991b1b; border: none;
+            padding: 8px 16px; border-radius: 10px; cursor: pointer;
+            font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 13px;
+        }
+        .logout-btn:hover { background: #fecaca; }
+
+        .card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .card h2 { font-size: 16px; color: #1e3a8a; margin-top: 0; margin-bottom: 15px; font-weight: 700; }
+
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+        .form-group input {
+            width: 100%; padding: 12px 14px; border-radius: 12px;
+            border: 1px solid #e2e8f0; font-family: 'Cairo', sans-serif;
+            font-size: 14px; outline: none; box-sizing: border-box; background: #fafafa;
+        }
+        .form-group input:focus { border-color: #1e3a8a; background: #fff; }
+
+        .btn {
+            background: #1e3a8a; color: white; border: none;
+            padding: 12px 20px; border-radius: 12px; cursor: pointer;
+            font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700;
+        }
+        .btn:hover { background: #1e40af; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #ffffff; padding: 25px; border-radius: 16px;
+            border: 1px solid #e2e8f0; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .stat-card h3 { margin: 0 0 15px 0; font-size: 15px; color: #64748b; font-weight: 600; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0; }
+
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th {
+            background: #f8fafc; color: #64748b; font-size: 13px;
+            padding: 14px; font-weight: 600; border-bottom: 1px solid #e2e8f0; white-space: nowrap;
+        }
+        td { padding: 14px; font-size: 13px; color: #1e293b; border-bottom: 1px solid #f1f5f9; }
+        tr:hover td { background: #fafafa; }
+
+        .badge {
+            background: #eff6ff; color: #1e3a8a;
+            padding: 4px 10px; border-radius: 8px;
+            font-size: 12px; font-weight: 600; white-space: nowrap;
+        }
+        .badge-ok { background: #ecfdf5; color: #047857; }
+        .badge-wait { background: #fffbeb; color: #b45309; }
+        .badge-off { background: #fee2e2; color: #991b1b; }
+
+        .invite-box {
+            background: #f0f6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+        .invite-box h3 { margin: 0 0 8px 0; font-size: 14px; color: #1e3a8a; }
+        .invite-box p { margin: 0 0 12px 0; font-size: 13px; color: #64748b; font-weight: 600; }
+        .invite-link {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 12px; font-size: 12px; color: #1e3a8a;
+            word-break: break-all; direction: ltr; text-align: left; margin-bottom: 12px;
+        }
+
+        .error-msg { color: #dc2626; font-size: 13px; font-weight: 600; margin: 0 0 15px 0; display: none; }
+        .empty { text-align: center; color: #64748b; padding: 30px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="dashboard-header">
+        <div class="brand-section">
+            <div class="logo-badge">تـ</div>
+            <div class="brand-info">
+                <h1>إدارة المشتركين</h1>
+                <p>منصة تزين — لوحة مالك المنصة</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a class="action-btn" href="dashboard.html">لوحة التحكم</a>
+            <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-card"><h3>إجمالي المشتركين</h3><p class="value" id="st-total">0</p></div>
+        <div class="stat-card"><h3>حسابات مفعّلة</h3><p class="value" id="st-active">0</p></div>
+        <div class="stat-card"><h3>بانتظار التفعيل</h3><p class="value" id="st-pending">0</p></div>
+    </div>
+
+    <!-- إضافة مشترك جديد -->
+    <div class="card">
+        <h2>إضافة مشترك جديد</h2>
+        <p class="error-msg" id="add-error"></p>
+        <form id="add-form" onsubmit="addClient(event)">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <div class="form-group">
+                    <label for="c-name">اسم الشركة أو المركز</label>
+                    <input type="text" id="c-name" placeholder="مثال: مركز تزين للجمال" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-email">البريد الإلكتروني للمسؤول</label>
+                    <input type="email" id="c-email" placeholder="name@company.com" required dir="ltr" style="text-align:right;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="c-logo">رابط شعار الشركة (اختياري)</label>
+                <input type="url" id="c-logo" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn" id="add-btn">إنشاء المشترك وتوليد رابط الدعوة</button>
+        </form>
+
+        <div class="invite-box" id="invite-box" style="display:none;">
+            <h3>رابط الدعوة جاهز</h3>
+            <p id="invite-note"></p>
+            <div class="invite-link" id="invite-link"></div>
+            <button class="action-btn" onclick="copyInvite()">نسخ الرابط</button>
+            <button class="action-btn" onclick="copyMessage()">نسخ رسالة جاهزة</button>
+        </div>
+    </div>
+
+    <!-- قائمة المشتركين -->
+    <div class="card">
+        <div class="card-header">
+            <h2 style="margin-bottom:0;">المشتركون</h2>
+            <button class="action-btn" onclick="loadClients()">تحديث البيانات</button>
+        </div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الشركة</th>
+                        <th>البريد</th>
+                        <th>حالة الحساب</th>
+                        <th>الاشتراك</th>
+                        <th>تاريخ الإضافة</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="clients-body">
+                    <tr><td colspan="6" class="empty">جاري التحميل...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://tmiqnvzlnnvhjswkkdrk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VJ8Usl1ZO5XVoIfbSRJD4Q_-tjZRNt2';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let clients = [];
+    let invites = [];
+    let lastInviteUrl = '';
+    let lastInviteCompany = '';
+
+    function esc(v) {
+        return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    }
+
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        const p = n => String(n).padStart(2, '0');
+        return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+
+    function baseUrl() {
+        return window.location.origin +
+            window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    }
+
+    // رمز عشوائي طويل يصعب تخمينه
+    function makeToken() {
+        const bytes = new Uint8Array(24);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // ===== بوابة الدخول: مالك المنصة فقط =====
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data } = await supabaseClient.auth.getSession();
+        if (!data.session) { window.location.replace('login.html'); return; }
+
+        const { data: isAdmin, error } = await supabaseClient.rpc('is_platform_admin');
+        if (error || !isAdmin) {
+            alert('هذه الصفحة مخصصة لإدارة المنصة فقط.');
+            window.location.replace('dashboard.html');
+            return;
+        }
+        loadClients();
+    });
+
+    // ===== جلب المشتركين =====
+    async function loadClients() {
+        const tbody = document.getElementById('clients-body');
+        try {
+            const [cRes, iRes] = await Promise.all([
+                supabaseClient.from('clients').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('client_invites').select('*').order('created_at', { ascending: false })
+            ]);
+
+            if (cRes.error) throw cRes.error;
+            clients = cRes.data || [];
+            invites = iRes.data || [];
+
+            const activeCount = clients.filter(c => c.auth_user_id).length;
+            document.getElementById('st-total').textContent = clients.length;
+            document.getElementById('st-active').textContent = activeCount;
+            document.getElementById('st-pending').textContent = clients.length - activeCount;
+
+            if (!clients.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty">لا يوجد مشتركون بعد. أضيفي أول مشترك من النموذج بالأعلى.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = clients.map(c => {
+                const linked = !!c.auth_user_id;
+                const status = linked
+                    ? '<span class="badge badge-ok">مفعّل</span>'
+                    : '<span class="badge badge-wait">بانتظار التفعيل</span>';
+                const sub = c.active
+                    ? '<span class="badge badge-ok">نشط</span>'
+                    : '<span class="badge badge-off">موقوف</span>';
+
+                const invite = invites.find(i => i.client_id === c.id && !i.used_at && new Date(i.expires_at) > new Date());
+                const action = linked
+                    ? `<button class="action-btn" onclick="toggleActive('${c.id}')">${c.active ? 'إيقاف الاشتراك' : 'تفعيل الاشتراك'}</button>`
+                    : (invite
+                        ? `<button class="action-btn" onclick="showInvite('${invite.token}','${esc(c.company_name)}','${esc(c.email)}')">عرض رابط الدعوة</button>`
+                        : `<button class="action-btn" onclick="newInvite('${c.id}','${esc(c.email)}','${esc(c.company_name)}')">إصدار دعوة جديدة</button>`);
+
+                return `<tr>
+                    <td><strong>${esc(c.company_name)}</strong></td>
+                    <td style="direction:ltr; text-align:right;">${esc(c.email || '—')}</td>
+                    <td>${status}</td>
+                    <td>${sub}</td>
+                    <td>${fmtDate(c.created_at)}</td>
+                    <td>${action}</td>
+                </tr>`;
+            }).join('');
+
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="6" class="empty" style="color:#ef4444;">تعذّر تحميل المشتركين: ${esc(err.message || '')}</td></tr>`;
+        }
+    }
+
+    // ===== إضافة مشترك =====
+    async function addClient(event) {
+        event.preventDefault();
+        const errorBox = document.getElementById('add-error');
+        errorBox.style.display = 'none';
+
+        const name = document.getElementById('c-name').value.trim();
+        const email = document.getElementById('c-email').value.trim().toLowerCase();
+        const logo = document.getElementById('c-logo').value.trim();
+        const btn = document.getElementById('add-btn');
+
+        btn.disabled = true;
+        btn.innerText = 'جاري الإنشاء...';
+
+        try {
+            const { data: client, error } = await supabaseClient
+                .from('clients')
+                .insert([{ company_name: name, email: email, logo_url: logo || null, active: true }])
+                .select()
+                .single();
+            if (error) throw error;
+
+            await newInvite(client.id, email, name);
+
+            document.getElementById('add-form').reset();
+            loadClients();
+
+        } catch (err) {
+            console.error(err);
+            errorBox.innerText = 'تعذّر الإنشاء: ' + (err.message || '');
+            errorBox.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'إنشاء المشترك وتوليد رابط الدعوة';
+        }
+    }
+
+    // ===== إصدار دعوة =====
+    async function newInvite(clientId, email, company) {
+        const token = makeToken();
+        const { error } = await supabaseClient
+            .from('client_invites')
+            .insert([{ client_id: clientId, token: token, email: email }]);
+
+        if (error) { alert('تعذّر إصدار الدعوة: ' + error.message); return; }
+
+        showInvite(token, company, email);
+        loadClients();
+    }
+
+    function showInvite(token, company, email) {
+        lastInviteUrl = `${baseUrl()}activate.html?t=${encodeURIComponent(token)}`;
+        lastInviteCompany = company;
+
+        document.getElementById('invite-note').innerText =
+            `أرسلي هذا الرابط إلى ${email} — صالح لمدة 14 يوماً ويُستخدم مرة واحدة فقط.`;
+        document.getElementById('invite-link').innerText = lastInviteUrl;
+        document.getElementById('invite-box').style.display = 'block';
+        document.getElementById('invite-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function copyInvite() {
+        await navigator.clipboard.writeText(lastInviteUrl);
+        alert('تم نسخ الرابط.');
+    }
+
+    async function copyMessage() {
+        const msg =
+`أهلاً بكم في منصة تزين
+
+تم تجهيز حساب ${lastInviteCompany} على المنصة.
+
+لتفعيل الحساب واختيار كلمة المرور، افتحوا الرابط التالي:
+${lastInviteUrl}
+
+الرابط صالح لمدة 14 يوماً ويُستخدم مرة واحدة.
+استخدموا نفس البريد الإلكتروني الذي وصلتكم عليه هذه الرسالة.`;
+        await navigator.clipboard.writeText(msg);
+        alert('تم نسخ الرسالة.');
+    }
+
+    // ===== إيقاف أو تفعيل الاشتراك =====
+    async function toggleActive(clientId) {
+        const c = clients.find(x => x.id === clientId);
+        if (!c) return;
+        const next = !c.active;
+        if (!confirm(next ? `تفعيل اشتراك ${c.company_name}؟`
+                          : `إيقاف اشتراك ${c.company_name}؟ لن يتمكن من الدخول للوحته.`)) return;
+
+        const { error } = await supabaseClient
+            .from('clients').update({ active: next }).eq('id', clientId);
+        if (error) return alert('تعذّر التحديث: ' + error.message);
+        loadClients();
+    }
+
+    async function logout() {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
+    }
+</script>
+</body>
+</html>
